@@ -2,6 +2,15 @@ import { HttpService } from '@nestjs/axios';
 import { Injectable, Logger } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import OpenAI from 'openai';
+import {
+  Message,
+  MessageCreateParams,
+} from 'openai/resources/beta/threads/messages';
+import {
+  RunCreateParamsBase,
+  RunCreateParamsNonStreaming,
+} from 'openai/resources/beta/threads/runs/runs';
+import { ThreadCreateParams } from 'openai/resources/beta/threads/threads';
 import { Observable, catchError, map, of, tap } from 'rxjs';
 
 interface IGPTMessage {
@@ -28,7 +37,6 @@ interface IGPTMessage {
 @Injectable()
 export class ChatGptService {
   private readonly logger = new Logger(ChatGptService.name);
-  private gptUrl: string;
   private gptApiKey: string;
   private headers;
   private openAI: OpenAI;
@@ -37,7 +45,7 @@ export class ChatGptService {
     private readonly httpService: HttpService,
     private readonly configService: ConfigService,
   ) {
-    this.gptApiKey = this.configService.get('GPT_API');
+    this.gptApiKey = this.configService.get<string>('GPT_API');
 
     this.openAI = new OpenAI({ apiKey: this.gptApiKey });
 
@@ -49,13 +57,14 @@ export class ChatGptService {
   }
 
   generateResponse(content: string, threadId: string): Promise<any> {
-    const data = {
-      // model: 'gpt-3.5-turbo',
+    const data: MessageCreateParams = {
       role: 'user',
-      content,
+      content: content,
     };
 
-    return this.httpService
+    return this.openAI.beta.threads.messages.create(threadId, data);
+
+    /*return this.httpService
       .post<IGPTMessage>(
         `https://api.openai.com/v1/threads/${threadId}/messages`,
         data,
@@ -64,81 +73,105 @@ export class ChatGptService {
       .pipe(
         map(({ data }) => data.content[0].text.value),
         catchError((err) => {
-          console.dir(err.response);
-          this.logger.error(err);
+          this.handleError(err);
           return of('Произошла ошибка');
         }),
       )
-      .toPromise();
+      .toPromise();*/
   }
 
-  createThread(messages: string[]) {
-    const body = {
-      messages: messages.map((message) => {
-        return {
-          role: 'user',
-          content: message,
-        };
-      }),
-    };
+  createThread(): Promise<any> {
+    return this.openAI.beta.threads.create();
 
-    console.log(body);
-
-    return this.httpService
+    /*return this.httpService
       .post(`https://api.openai.com/v1/threads`, body, {
         headers: this.headers,
       })
       .pipe(
-        map(({ data }) => {
-          return data;
-        }),
+        map(({ data }) => data),
         catchError((err) => {
-          console.dir(err.response);
-          this.logger.error(err);
+          this.handleError(err);
           return of('Произошла ошибка');
         }),
       )
-      .toPromise();
+      .toPromise();*/
   }
 
-  async runAssistantByThread(thread) {
-    const data = {
-      assistant_id: 'asst_EHIgJXsOknU9rmXIYqcOJw6Q',
+  async runAssistantByThread(payload: { thread_id: string }): Promise<any> {
+    const data: RunCreateParamsBase = {
+      assistant_id: process.env.ASSISTANT_ID,
     };
-    console.log('run activate', thread.thread_id);
-    return this.httpService
+
+    return this.openAI.beta.threads.runs.create(payload.thread_id, { ...data });
+
+    /* return this.httpService
       .post(
-        `https://api.openai.com/v1/threads/${thread.thread_id}/runs`,
+        `https://api.openai.com/v1/threads/${payload.thread_id}/runs`,
         data,
         { headers: this.headers },
       )
       .pipe(
-        tap(() => {
-          console.log('hi run tap');
-        }),
-        map(({ data }) => {
-          console.log(data);
-          return data;
-        }),
+        tap(() => this.logger.log('Run Assistant initiated')),
+        map(({ data }) => data),
         catchError((err) => {
-          console.dir(err.response);
-          this.logger.error(err);
+          this.handleError(err);
           return of('Произошла ошибка');
         }),
       )
-      .toPromise();
+      .toPromise(); */
   }
 
-  async retrieveRun(thread_id: string, run_id: string) {
-    return this.httpService
+  async retrieveRun(thread_id: string, run_id: string): Promise<any> {
+    return this.openAI.beta.threads.runs.retrieve(thread_id, run_id);
+
+    /* return this.httpService
       .get(`https://api.openai.com/v1/threads/${thread_id}/runs/${run_id}`, {
         headers: this.headers,
       })
       .pipe(
-        tap(() => {
-          console.log('hi retrieve run');
+        map((res) => res.data),
+        tap((res) => this.logger.log('Run retrieved', res)),
+        catchError((err) => {
+          this.handleError(err);
+          return of('Произошла ошибка');
         }),
       )
-      .toPromise();
+      .toPromise(); */
+  }
+
+  async getThreadLastMessages(threadId: string) {
+    return this.openAI.beta.threads.messages.list(threadId);
+  }
+
+  async submitToolOuputs(threadId: string, runId: string, toolOutputs: any) {
+    return this.openAI.beta.threads.runs.submitToolOutputs(threadId, runId, {
+      tool_outputs: toolOutputs,
+    });
+  }
+
+  private handleError(err: any): void {
+    if (err.response) {
+      this.logger.error(
+        `Error ${err.response.status}: ${JSON.stringify(
+          err.response.data,
+          this.getCircularReplacer(),
+        )}`,
+      );
+    } else {
+      this.logger.error(`Error: ${err.message}`);
+    }
+  }
+
+  private getCircularReplacer(): (key: string, value: any) => any {
+    const seen = new WeakSet();
+    return (key: string, value: any) => {
+      if (typeof value === 'object' && value !== null) {
+        if (seen.has(value)) {
+          return;
+        }
+        seen.add(value);
+      }
+      return value;
+    };
   }
 }
