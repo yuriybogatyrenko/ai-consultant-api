@@ -52,6 +52,11 @@ export class ChatGptController {
 
   @Post('check')
   async retrieveRun(@Body() body: { threadId: string; runId: string }) {
+    if (!body.threadId || !body.runId) {
+      console.log('Error: Missing thread_id or run_id in /check');
+      return { response: 'error' };
+    }
+
     let counter = 0;
     while (counter < 9) {
       const run = await this.service
@@ -64,18 +69,20 @@ export class ChatGptController {
           );
         });
 
-      console.dir(run);
+      // console.dir(run);
 
       if (run.status === 'completed') {
         const message = await this.getThreadLastMessage(body.threadId);
 
-        console.log('Action completed');
+        console.log('run completed');
         return { status: 'completed', response: message };
       }
 
       if (run.status === 'requires_action') {
+        console.log('Actions in progress...');
         run.required_action.submit_tool_outputs.tool_calls.forEach(
           (tool_call) => {
+            console.log('action name', tool_call.name);
             if (tool_call.function.name === 'get_phone_and_name') {
               const data = [
                 {
@@ -88,15 +95,18 @@ export class ChatGptController {
             }
           },
         );
+        console.log('Actions done');
 
-        console.log('Action in progress...');
-        console.dir(run.required_action.submit_tool_outputs.tool_calls);
-        console.dir(run.tools[0].function);
+        // console.dir(run.required_action.submit_tool_outputs.tool_calls);
+        // console.dir(run.tools[0].function);
       }
 
       await this.sleep(1000);
       counter = counter + 1;
     }
+
+    console.log('timeout');
+    return { response: 'timeout' };
   }
 
   async runAssistant(payload: { thread_id: string }) {
