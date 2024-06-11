@@ -82,12 +82,12 @@ export class ChatGptController {
         console.log('Actions in progress...');
         run.required_action.submit_tool_outputs.tool_calls.forEach(
           (tool_call) => {
-            console.log('action name', tool_call.name);
+            console.log('action name', tool_call.function.name);
             if (tool_call.function.name === 'get_phone_and_name') {
               const data = [
                 {
-                  toll_call_id: tool_call.id,
-                  output: JSON.parse(tool_call.function.arguments),
+                  tool_call_id: tool_call.id,
+                  output: tool_call.function.arguments,
                 },
               ];
 
@@ -102,6 +102,7 @@ export class ChatGptController {
       }
 
       await this.sleep(1000);
+      console.log('timer', counter);
       counter = counter + 1;
     }
 
