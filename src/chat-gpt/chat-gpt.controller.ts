@@ -40,7 +40,7 @@ export class ChatGptController {
   }
 
   @Post('start')
-  async createThread(@Body() message: ThreadCreateParams.Message) {
+  async createThread() {
     return this.service.createThread().catch((error) => {
       console.error('Error creating thread:', error);
       throw new HttpException(
@@ -53,7 +53,7 @@ export class ChatGptController {
   @Post('check')
   async retrieveRun(@Body() body: { threadId: string; runId: string }) {
     if (!body.threadId || !body.runId) {
-      console.log('Error: Missing thread_id or run_id in /check');
+      console.error('Error: Missing thread_id or run_id in /check');
       return { response: 'error' };
     }
 
