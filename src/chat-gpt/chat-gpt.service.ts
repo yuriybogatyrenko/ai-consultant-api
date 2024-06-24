@@ -1,17 +1,8 @@
-import { HttpService } from '@nestjs/axios';
 import { Injectable, Logger } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import OpenAI from 'openai';
-import {
-  Message,
-  MessageCreateParams,
-} from 'openai/resources/beta/threads/messages';
-import {
-  RunCreateParamsBase,
-  RunCreateParamsNonStreaming,
-} from 'openai/resources/beta/threads/runs/runs';
-import { ThreadCreateParams } from 'openai/resources/beta/threads/threads';
-import { Observable, catchError, map, of, tap } from 'rxjs';
+import { MessageCreateParams } from 'openai/resources/beta/threads/messages';
+import { RunCreateParamsBase } from 'openai/resources/beta/threads/runs/runs';
 
 interface IGPTMessage {
   id: string;
@@ -41,10 +32,7 @@ export class ChatGptService {
   private headers;
   private openAI: OpenAI;
 
-  constructor(
-    private readonly httpService: HttpService,
-    private readonly configService: ConfigService,
-  ) {
+  constructor(private readonly configService: ConfigService) {
     this.gptApiKey = this.configService.get<string>('GPT_API');
 
     this.openAI = new OpenAI({ apiKey: this.gptApiKey });
@@ -63,38 +51,10 @@ export class ChatGptService {
     };
 
     return this.openAI.beta.threads.messages.create(threadId, data);
-
-    /*return this.httpService
-      .post<IGPTMessage>(
-        `https://api.openai.com/v1/threads/${threadId}/messages`,
-        data,
-        { headers: this.headers },
-      )
-      .pipe(
-        map(({ data }) => data.content[0].text.value),
-        catchError((err) => {
-          this.handleError(err);
-          return of('Произошла ошибка');
-        }),
-      )
-      .toPromise();*/
   }
 
   createThread(): Promise<any> {
     return this.openAI.beta.threads.create();
-
-    /*return this.httpService
-      .post(`https://api.openai.com/v1/threads`, body, {
-        headers: this.headers,
-      })
-      .pipe(
-        map(({ data }) => data),
-        catchError((err) => {
-          this.handleError(err);
-          return of('Произошла ошибка');
-        }),
-      )
-      .toPromise();*/
   }
 
   async runAssistantByThread(payload: { thread_id: string }): Promise<any> {
@@ -103,40 +63,10 @@ export class ChatGptService {
     };
 
     return this.openAI.beta.threads.runs.create(payload.thread_id, { ...data });
-
-    /* return this.httpService
-      .post(
-        `https://api.openai.com/v1/threads/${payload.thread_id}/runs`,
-        data,
-        { headers: this.headers },
-      )
-      .pipe(
-        tap(() => this.logger.log('Run Assistant initiated')),
-        map(({ data }) => data),
-        catchError((err) => {
-          this.handleError(err);
-          return of('Произошла ошибка');
-        }),
-      )
-      .toPromise(); */
   }
 
   async retrieveRun(thread_id: string, run_id: string): Promise<any> {
     return this.openAI.beta.threads.runs.retrieve(thread_id, run_id);
-
-    /* return this.httpService
-      .get(`https://api.openai.com/v1/threads/${thread_id}/runs/${run_id}`, {
-        headers: this.headers,
-      })
-      .pipe(
-        map((res) => res.data),
-        tap((res) => this.logger.log('Run retrieved', res)),
-        catchError((err) => {
-          this.handleError(err);
-          return of('Произошла ошибка');
-        }),
-      )
-      .toPromise(); */
   }
 
   async getThreadLastMessages(threadId: string) {
