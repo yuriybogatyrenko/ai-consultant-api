@@ -4,14 +4,16 @@ import {
   HttpException,
   HttpStatus,
   Post,
+  UseGuards,
 } from '@nestjs/common';
+import { ApiKeyGuard } from 'src/auth/api-key.guard';
 import { ChatGptService } from './chat-gpt.service';
-import { ThreadCreateParams } from 'openai/resources/beta/threads/threads';
 
 @Controller('chat-gpt')
 export class ChatGptController {
   constructor(private readonly service: ChatGptService) {}
 
+  @UseGuards(ApiKeyGuard)
   @Post('message')
   async getGPTResponse(@Body() body: { message: string; threadId: string }) {
     if (!body.threadId) {
@@ -90,6 +92,8 @@ export class ChatGptController {
                   output: tool_call.function.arguments,
                 },
               ];
+
+              const company_webhook_url = 'http://138.68.109.206/api/';
 
               this.submitToolOuputs(body.threadId, body.runId, data);
             }

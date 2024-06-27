@@ -1,12 +1,11 @@
 import { Module } from '@nestjs/common';
+import { ApiKeysModule } from 'src/api-keys/api-keys.module';
 import { ChatGptController } from './chat-gpt.controller';
 import { ChatGptService } from './chat-gpt.service';
-import { HttpModule } from '@nestjs/axios';
-import { ConfigModule } from '@nestjs/config';
 
 @Module({
   controllers: [ChatGptController],
   providers: [ChatGptService],
-  imports: [HttpModule, ConfigModule],
+  imports: [ApiKeysModule],
 })
 export class ChatGptModule {}

@@ -4,44 +4,16 @@ import OpenAI from 'openai';
 import { MessageCreateParams } from 'openai/resources/beta/threads/messages';
 import { RunCreateParamsBase } from 'openai/resources/beta/threads/runs/runs';
 
-interface IGPTMessage {
-  id: string;
-  object: string;
-  created_at: number;
-  thread_id: string;
-  role: string;
-  content: [
-    {
-      type: string;
-      text: {
-        value: string;
-        annotations: Array<any>;
-      };
-    },
-  ];
-  file_ids: Array<any>;
-  assistant_id: string;
-  run_id: string;
-  metadata: any;
-}
-
 @Injectable()
 export class ChatGptService {
   private readonly logger = new Logger(ChatGptService.name);
   private gptApiKey: string;
-  private headers;
   private openAI: OpenAI;
 
   constructor(private readonly configService: ConfigService) {
     this.gptApiKey = this.configService.get<string>('GPT_API');
 
     this.openAI = new OpenAI({ apiKey: this.gptApiKey });
-
-    this.headers = {
-      'Content-Type': 'application/json',
-      Authorization: `Bearer ${this.gptApiKey}`,
-      'OpenAI-Beta': 'assistants=v2',
-    };
   }
 
   generateResponse(content: string, threadId: string): Promise<any> {
