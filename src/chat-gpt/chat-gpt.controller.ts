@@ -7,9 +7,11 @@ import {
   Post,
   UseGuards,
 } from '@nestjs/common';
+import { tap } from 'rxjs';
 import { ApiKeyGuard } from 'src/auth/api-key.guard';
 import { ChatGptService } from './chat-gpt.service';
 
+@UseGuards(ApiKeyGuard)
 @Controller('chat-gpt')
 export class ChatGptController {
   constructor(
@@ -17,7 +19,6 @@ export class ChatGptController {
     private readonly httpService: HttpService,
   ) {}
 
-  @UseGuards(ApiKeyGuard)
   @Post('message')
   async getGPTResponse(
     @Body()
@@ -46,7 +47,11 @@ export class ChatGptController {
           thread_id: body.threadId,
           assistant_id: body.assistantId,
         });
-        return { message: response, assistantRun };
+        return {
+          threadId: response.thread_id,
+          messageId: response.id,
+          runId: assistantRun.id,
+        };
       })
       .catch((error) => {
         console.error('Error generating response:', error);
@@ -57,7 +62,6 @@ export class ChatGptController {
       });
   }
 
-  @UseGuards(ApiKeyGuard)
   @Post('start')
   async createThread() {
     return this.gptService.createThread().catch((error) => {
@@ -98,6 +102,10 @@ export class ChatGptController {
 
       // console.dir(run);
 
+      if (run.status === 'expired') {
+        return { status: 'expired', response: 'Error expired' };
+      }
+
       if (run.status === 'completed') {
         const message = await this.getThreadLastMessage(body.threadId);
 
@@ -107,33 +115,41 @@ export class ChatGptController {
 
       if (run.status === 'requires_action') {
         console.log('Actions in progress...');
-        run.required_action.submit_tool_outputs.tool_calls.forEach(
+        await run.required_action.submit_tool_outputs.tool_calls.forEach(
           async (tool_call) => {
             if (tool_call.function.name) {
               console.log('action name: ', tool_call.function.name);
-              const response = await this.httpService.post(body.webhookUrl, {
-                data: {
+              const response = this.httpService
+                .post(body.webhookUrl, {
                   body: body,
                   function_name: tool_call.function.name,
                   output: tool_call.function.arguments,
-                },
-              });
+                })
+                .subscribe({
+                  next: (next) => {
+                    const output = [
+                      {
+                        tool_call_id: tool_call.id,
+                        output: tool_call.function.arguments,
+                      },
+                    ];
+
+                    if (next.data.success) {
+                      this.submitToolOuputs(body.threadId, body.runId, output);
+                    }
+                  },
+                  error: (err) => console.log(err),
+                  complete: () => {
+                    console.log('request completed');
+                  },
+                });
 
               console.log(response);
             }
-            console.log('action name', tool_call.function.name);
+            /* console.log('action name', tool_call.function.name);
             if (tool_call.function.name === 'get_phone_and_name') {
-              const data = [
-                {
-                  tool_call_id: tool_call.id,
-                  output: tool_call.function.arguments,
-                },
-              ];
-
-              const company_webhook_url = 'http://138.68.109.206/api/';
-
-              this.submitToolOuputs(body.threadId, body.runId, data);
-            }
+              
+            } */
           },
         );
         console.log('Actions done');
@@ -161,11 +177,15 @@ export class ChatGptController {
     });
   }
 
-  async submitToolOuputs(threadId: string, runId: string, toolOuputs: any) {
+  private async submitToolOuputs(
+    threadId: string,
+    runId: string,
+    toolOuputs: any,
+  ) {
     return this.gptService.submitToolOuputs(threadId, runId, toolOuputs);
   }
 
-  async getThreadLastMessage(threadId: string) {
+  private async getThreadLastMessage(threadId: string) {
     return this.gptService
       .getThreadLastMessages(threadId)
       .then((messages: any) => {
@@ -181,7 +201,7 @@ export class ChatGptController {
       });
   }
 
-  async sleep(ms: number) {
+  private async sleep(ms: number) {
     return new Promise((resolve) => setTimeout(resolve, ms));
   }
 }
