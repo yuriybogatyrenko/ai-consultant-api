@@ -29,9 +29,12 @@ export class ChatGptService {
     return this.openAI.beta.threads.create();
   }
 
-  async runAssistantByThread(payload: { thread_id: string }): Promise<any> {
+  async runAssistantByThread(payload: {
+    thread_id: string;
+    assistant_id: string;
+  }): Promise<any> {
     const data: RunCreateParamsBase = {
-      assistant_id: process.env.ASSISTANT_ID,
+      assistant_id: payload.assistant_id,
     };
 
     return this.openAI.beta.threads.runs.create(payload.thread_id, { ...data });

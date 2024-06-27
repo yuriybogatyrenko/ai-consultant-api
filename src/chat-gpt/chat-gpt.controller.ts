@@ -1,3 +1,4 @@
+import { HttpService } from '@nestjs/axios';
 import {
   Body,
   Controller,
@@ -11,11 +12,25 @@ import { ChatGptService } from './chat-gpt.service';
 
 @Controller('chat-gpt')
 export class ChatGptController {
-  constructor(private readonly service: ChatGptService) {}
+  constructor(
+    private readonly gptService: ChatGptService,
+    private readonly httpService: HttpService,
+  ) {}
 
   @UseGuards(ApiKeyGuard)
   @Post('message')
-  async getGPTResponse(@Body() body: { message: string; threadId: string }) {
+  async getGPTResponse(
+    @Body()
+    body: {
+      message: string;
+      threadId: string;
+      assistantId: string;
+      clientId: string;
+      insta_source: string;
+      telegram_source: string;
+      webhook: string;
+    },
+  ) {
     if (!body.threadId) {
       console.error('Invalid thread');
       throw new HttpException(
@@ -24,11 +39,12 @@ export class ChatGptController {
       );
     }
 
-    return this.service
+    return this.gptService
       .generateResponse(body.message, body.threadId)
       .then(async (response) => {
         const assistantRun = await this.runAssistant({
           thread_id: body.threadId,
+          assistant_id: body.assistantId,
         });
         return { message: response, assistantRun };
       })
@@ -41,9 +57,10 @@ export class ChatGptController {
       });
   }
 
+  @UseGuards(ApiKeyGuard)
   @Post('start')
   async createThread() {
-    return this.service.createThread().catch((error) => {
+    return this.gptService.createThread().catch((error) => {
       console.error('Error creating thread:', error);
       throw new HttpException(
         'Произошла ошибка при создании треда',
@@ -53,7 +70,15 @@ export class ChatGptController {
   }
 
   @Post('check')
-  async retrieveRun(@Body() body: { threadId: string; runId: string }) {
+  async retrieveRun(
+    @Body()
+    body: {
+      threadId: string;
+      runId: string;
+      webhookUrl: string;
+      clientId: string;
+    },
+  ) {
     if (!body.threadId || !body.runId) {
       console.error('Error: Missing thread_id or run_id in /check');
       return { response: 'error' };
@@ -61,7 +86,7 @@ export class ChatGptController {
 
     let counter = 0;
     while (counter < 9) {
-      const run = await this.service
+      const run = await this.gptService
         .retrieveRun(body.threadId, body.runId)
         .catch((error) => {
           console.error('Error retrieving run:', error);
@@ -83,7 +108,19 @@ export class ChatGptController {
       if (run.status === 'requires_action') {
         console.log('Actions in progress...');
         run.required_action.submit_tool_outputs.tool_calls.forEach(
-          (tool_call) => {
+          async (tool_call) => {
+            if (tool_call.function.name) {
+              console.log('action name: ', tool_call.function.name);
+              const response = await this.httpService.post(body.webhookUrl, {
+                data: {
+                  body: body,
+                  function_name: tool_call.function.name,
+                  output: tool_call.function.arguments,
+                },
+              });
+
+              console.log(response);
+            }
             console.log('action name', tool_call.function.name);
             if (tool_call.function.name === 'get_phone_and_name') {
               const data = [
@@ -114,8 +151,8 @@ export class ChatGptController {
     return { response: 'timeout' };
   }
 
-  async runAssistant(payload: { thread_id: string }) {
-    return this.service.runAssistantByThread(payload).catch((error) => {
+  async runAssistant(payload: { thread_id: string; assistant_id: string }) {
+    return this.gptService.runAssistantByThread(payload).catch((error) => {
       console.error('Error running assistant:', error);
       throw new HttpException(
         'Произошла ошибка при запуске ассистента',
@@ -125,11 +162,11 @@ export class ChatGptController {
   }
 
   async submitToolOuputs(threadId: string, runId: string, toolOuputs: any) {
-    return this.service.submitToolOuputs(threadId, runId, toolOuputs);
+    return this.gptService.submitToolOuputs(threadId, runId, toolOuputs);
   }
 
   async getThreadLastMessage(threadId: string) {
-    return this.service
+    return this.gptService
       .getThreadLastMessages(threadId)
       .then((messages: any) => {
         let messageContent = messages.data[0].content[0].text;
