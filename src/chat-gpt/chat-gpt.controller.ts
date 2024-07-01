@@ -21,7 +21,7 @@ export class ChatGptController {
 
   @Post('start')
   async createThread(@Body() body: any) {
-    console.log(body);
+    console.log('ai start thread');
     const response = await this.httpService
       .post(body.webhookUrl, { clientData: body.clientData })
       .toPromise();
@@ -48,6 +48,7 @@ export class ChatGptController {
       webhook: string;
     },
   ) {
+    console.log('ai start message');
     if (!body.threadId) {
       console.error('Invalid thread');
       throw new HttpException(
@@ -89,6 +90,7 @@ export class ChatGptController {
       clientData: Object;
     },
   ) {
+    console.log('ai start check');
     if (!body.threadId || !body.runId) {
       console.error('Error: Missing thread_id or run_id in /check');
       return { response: 'error' };
