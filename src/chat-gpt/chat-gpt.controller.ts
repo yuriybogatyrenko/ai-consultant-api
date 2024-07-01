@@ -23,7 +23,7 @@ export class ChatGptController {
   async createThread(@Body() body: any) {
     console.log(body);
     const response = await this.httpService
-      .post(body.webhookUrl, { clientData: body.data })
+      .post(body.webhookUrl, { clientData: body.clientData })
       .toPromise();
 
     console.log(response);
@@ -44,9 +44,7 @@ export class ChatGptController {
       message: string;
       threadId: string;
       assistantId: string;
-      clientId: string;
-      insta_source: string;
-      telegram_source: string;
+      clientData: Object;
       webhook: string;
     },
   ) {
@@ -65,6 +63,7 @@ export class ChatGptController {
           thread_id: body.threadId,
           assistant_id: body.assistantId,
         });
+
         return {
           threadId: response.thread_id,
           messageId: response.id,
