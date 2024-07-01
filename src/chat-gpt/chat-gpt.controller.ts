@@ -128,7 +128,7 @@ export class ChatGptController {
           run.required_action.submit_tool_outputs.tool_calls.map(
             async (tool_call) => {
               if (tool_call.function?.name) {
-                console.log('action name: ', tool_call.function.name);
+                console.log('action name: ', tool_call);
                 try {
                   const response = await this.httpService
                     .post(body.webhookUrl, {
