@@ -19,6 +19,24 @@ export class ChatGptController {
     private readonly httpService: HttpService,
   ) {}
 
+  @Post('start')
+  async createThread(@Body() body: any) {
+    console.log(body);
+    const response = await this.httpService
+      .post(body.webhookUrl, { clientData: body.data })
+      .toPromise();
+
+    console.log(response);
+
+    return this.gptService.createThread().catch((error) => {
+      console.error('Error creating thread:', error);
+      throw new HttpException(
+        'Произошла ошибка при создании треда',
+        HttpStatus.INTERNAL_SERVER_ERROR,
+      );
+    });
+  }
+
   @Post('message')
   async getGPTResponse(
     @Body()
@@ -62,17 +80,6 @@ export class ChatGptController {
       });
   }
 
-  @Post('start')
-  async createThread() {
-    return this.gptService.createThread().catch((error) => {
-      console.error('Error creating thread:', error);
-      throw new HttpException(
-        'Произошла ошибка при создании треда',
-        HttpStatus.INTERNAL_SERVER_ERROR,
-      );
-    });
-  }
-
   @Post('check')
   async retrieveRun(
     @Body()
@@ -80,7 +87,7 @@ export class ChatGptController {
       threadId: string;
       runId: string;
       webhookUrl: string;
-      clientId: string;
+      clientData: Object;
     },
   ) {
     if (!body.threadId || !body.runId) {
@@ -115,47 +122,41 @@ export class ChatGptController {
 
       if (run.status === 'requires_action') {
         console.log('Actions in progress...');
-        await run.required_action.submit_tool_outputs.tool_calls.forEach(
-          async (tool_call) => {
-            if (tool_call.function.name) {
-              console.log('action name: ', tool_call.function.name);
-              const response = this.httpService
-                .post(body.webhookUrl, {
-                  body: body,
-                  function_name: tool_call.function.name,
-                  output: tool_call.function.arguments,
-                })
-                .subscribe({
-                  next: (next) => {
-                    const output = [
-                      {
-                        tool_call_id: tool_call.id,
-                        output: tool_call.function.arguments,
-                      },
-                    ];
+        // const output = [];
+        const output = await Promise.all(
+          run.required_action.submit_tool_outputs.tool_calls.map(
+            async (tool_call) => {
+              if (tool_call.function?.name) {
+                console.log('action name: ', tool_call.function.name);
+                try {
+                  const response = await this.httpService
+                    .post(body.webhookUrl, {
+                      ...body,
+                      functionObject: tool_call.function,
+                    })
+                    .toPromise();
 
-                    if (next.data.success) {
-                      this.submitToolOuputs(body.threadId, body.runId, output);
-                    }
-                  },
-                  error: (err) => console.log(err),
-                  complete: () => {
-                    console.log('request completed');
-                  },
-                });
-
-              console.log(response);
-            }
-            /* console.log('action name', tool_call.function.name);
-            if (tool_call.function.name === 'get_phone_and_name') {
-              
-            } */
-          },
+                  // console.log(response.data);
+                  if (response.data.success) {
+                    return {
+                      tool_call_id: tool_call.id,
+                      output: tool_call.function.arguments,
+                    };
+                  } else {
+                    return {};
+                  }
+                } catch (err) {
+                  console.log(err);
+                  return {};
+                }
+              }
+              return {};
+            },
+          ),
         );
-        console.log('Actions done');
 
-        // console.dir(run.required_action.submit_tool_outputs.tool_calls);
-        // console.dir(run.tools[0].function);
+        this.submitToolOuputs(body.threadId, body.runId, output);
+        console.log('Actions done');
       }
 
       await this.sleep(1000);
