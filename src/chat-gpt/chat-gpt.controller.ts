@@ -63,6 +63,8 @@ export class ChatGptController {
         const assistantRun = await this.runAssistant({
           thread_id: body.threadId,
           assistant_id: body.assistantId,
+        }).catch((err) => {
+          console.log(err);
         });
 
         return {
@@ -138,16 +140,18 @@ export class ChatGptController {
                     .toPromise();
 
                   // console.log(response.data);
-                  if (response.data.success) {
+                  if (response.data) {
+                    console.log('######### response from backend #########');
+                    console.log(response.data);
                     return {
                       tool_call_id: tool_call.id,
-                      output: tool_call.function.arguments,
+                      output: JSON.stringify(response.data),
                     };
                   } else {
                     return {};
                   }
                 } catch (err) {
-                  console.log(err);
+                  console.error(err);
                   return {};
                 }
               }
