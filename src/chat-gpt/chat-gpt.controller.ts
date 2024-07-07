@@ -140,19 +140,27 @@ export class ChatGptController {
                     .toPromise();
 
                   // console.log(response.data);
-                  if (response.data) {
+                  if (response) {
                     console.log('######### response from backend #########');
                     console.log(response.data);
                     return {
                       tool_call_id: tool_call.id,
-                      output: JSON.stringify(response.data),
+                      output: response.data
+                        ? JSON.stringify(response.data)
+                        : '',
                     };
                   } else {
-                    return {};
+                    return {
+                      tool_call_id: tool_call.id,
+                      output: `Can't procceed data`,
+                    };
                   }
                 } catch (err) {
                   console.error(err);
-                  return {};
+                  return {
+                    tool_call_id: tool_call.id,
+                    output: err.message,
+                  };
                 }
               }
               return {};
