@@ -7,7 +7,6 @@ import {
   Post,
   UseGuards,
 } from '@nestjs/common';
-import { tap } from 'rxjs';
 import { ApiKeyGuard } from 'src/auth/api-key.guard';
 import { ChatGptService } from './chat-gpt.service';
 
