@@ -1,5 +1,12 @@
 import { UserEntity } from 'src/users/user.entity';
-import { Column, Entity, ManyToOne, PrimaryGeneratedColumn } from 'typeorm';
+import {
+  Column,
+  CreateDateColumn,
+  Entity,
+  ManyToOne,
+  PrimaryGeneratedColumn,
+  UpdateDateColumn,
+} from 'typeorm';
 
 @Entity()
 export class ApiKeyEntity {
@@ -11,4 +18,10 @@ export class ApiKeyEntity {
 
   @ManyToOne(() => UserEntity, (user) => user.apiKeys)
   user: UserEntity;
+
+  @CreateDateColumn()
+  createdAt: Date;
+
+  @UpdateDateColumn()
+  updatedAt: Date;
 }

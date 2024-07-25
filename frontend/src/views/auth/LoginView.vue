@@ -1,42 +1,62 @@
 <template>
-  <div>
+  <v-container class="login-container">
     <h1>Login</h1>
-    <form @submit.prevent="loginUser">
-      <div>
-        <label for="email">Email:</label>
-        <input type="email" id="email" v-model="email" required />
-      </div>
-      <div>
-        <label for="password">Password:</label>
-        <input type="password" id="password" v-model="password" required />
-      </div>
-      <div>
-        <button type="submit">Login</button>
-      </div>
-    </form>
-  </div>
+    <v-form @submit.prevent="loginUser" class="login-form">
+      <v-row>
+        <v-col cols="12" sm="6" offset-sm="3">
+          <v-text-field
+            v-model="form.email"
+            label="Email"
+            required
+            outlined
+            dense
+          ></v-text-field>
+        </v-col>
+      </v-row>
+      <v-row>
+        <v-col cols="12" sm="6" offset-sm="3">
+          <v-text-field
+            v-model="form.password"
+            label="Password"
+            type="password"
+            required
+            outlined
+            dense
+          ></v-text-field>
+        </v-col>
+      </v-row>
+      <v-row>
+        <v-col cols="12" sm="6" offset-sm="3">
+          <v-btn type="submit" color="primary" class="login-button"
+            >Login</v-btn
+          >
+        </v-col>
+      </v-row>
+    </v-form>
+  </v-container>
 </template>
 
 <script>
+import api from '@/api.service';
+import authService from '@/services/auth/auth.service';
+
 export default {
   data() {
     return {
-      email: '',
-      password: '',
+      form: { email: '', password: '' },
     };
   },
   methods: {
-    loginUser() {
-      // Perform user login logic here
-      // You can access the email and password values using this.email and this.password
-      // For example, you can make an API call to authenticate the user
-      // axios.post('/api/login', { email: this.email, password: this.password })
-      //   .then(response => {
-      //     // Handle successful login
-      //   })
-      //   .catch(error => {
-      //     // Handle login error
-      //   })
+    async loginUser() {
+      try {
+        const { email, password } = this.form;
+        const authDetails = await api.post('/auth/login', { email, password });
+        authService.saveToken(authDetails.data.access_token);
+        this.$router.push({ name: 'home' });
+        console.log(authDetails);
+      } catch (error) {
+        console.error(error);
+      }
     },
   },
 };

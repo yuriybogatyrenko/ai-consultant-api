@@ -8,29 +8,32 @@ const routes = [
     component: HomeView,
   },
   {
-    path: '/about',
-    name: 'about',
-    // route level code-splitting
-    // this generates a separate chunk (about.[hash].js) for this route
-    // which is lazy-loaded when the route is visited.
+    path: '/cabinet',
+    name: 'cabinet',
     component: () =>
-      import(/* webpackChunkName: "about" */ '../views/AboutView.vue'),
+      import(
+        /* webpackChunkName: "cabinet" */ '../views/cabinet/CabinetLayout.vue'
+      ),
+    children: [
+      {
+        path: 'api-keys',
+        name: 'cabinet-api-keys',
+        component: () =>
+          import(
+            /* webpackChunkName: "cabinet-api-keys" */ '../views/cabinet/ApiKeyView.vue'
+          ),
+      },
+    ],
   },
   {
     path: '/auth/login',
     name: 'login',
-    // route level code-splitting
-    // this generates a separate chunk (about.[hash].js) for this route
-    // which is lazy-loaded when the route is visited.
     component: () =>
       import(/* webpackChunkName: "login" */ '../views/auth/LoginView.vue'),
   },
   {
     path: '/auth/register',
     name: 'register',
-    // route level code-splitting
-    // this generates a separate chunk (about.[hash].js) for this route
-    // which is lazy-loaded when the route is visited.
     component: () =>
       import(
         /* webpackChunkName: "register" */ '../views/auth/RegisterView.vue'

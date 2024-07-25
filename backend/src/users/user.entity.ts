@@ -2,9 +2,11 @@ import { ApiKeyEntity } from 'src/api-keys/api-keys.entity';
 import {
   BeforeInsert,
   Column,
+  CreateDateColumn,
   Entity,
   OneToMany,
   PrimaryGeneratedColumn,
+  UpdateDateColumn,
 } from 'typeorm';
 import * as bcrypt from 'bcrypt';
 
@@ -26,4 +28,10 @@ export class UserEntity {
   async hashPassword() {
     this.password = await bcrypt.hash(this.password, 10);
   }
+
+  @CreateDateColumn()
+  createdAt: Date;
+
+  @UpdateDateColumn()
+  updatedAt: Date;
 }

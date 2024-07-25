@@ -15,7 +15,38 @@
   </div>
 </template>
 
-<style scoped>
+<script>
+import api from '@/api.service';
+
+export default {
+  data() {
+    return {
+      form: {
+        email: '',
+        password: '',
+      },
+    };
+  },
+  methods: {
+    async registerUser() {
+      this.errorMessage = ''; // Сброс сообщения об ошибке перед попыткой регистрации
+      try {
+        await api.post('/auth/register', this.form);
+        // Обработка успешной регистрации
+        this.$router.push({ name: 'login' });
+      } catch (error) {
+        // Обработка ошибки регистрации
+        this.errorMessage =
+          error.response?.data?.message ||
+          'Произошла ошибка при регистрации. Пожалуйста, попробуйте снова.';
+        console.log(error);
+      }
+    },
+  },
+};
+</script>
+
+<style scoped lang="scss">
 .register-view {
   display: flex;
   flex-direction: column;
@@ -65,34 +96,3 @@ input[type='password'] {
   background-color: #0056b3;
 }
 </style>
-
-<script>
-import api from '@/api.service';
-
-export default {
-  data() {
-    return {
-      form: {
-        email: '',
-        password: '',
-      },
-    };
-  },
-  methods: {
-    async registerUser() {
-      this.errorMessage = ''; // Сброс сообщения об ошибке перед попыткой регистрации
-      try {
-        await api.post('/register', this.form);
-        // Обработка успешной регистрации
-        this.$router.push({ name: 'login' });
-      } catch (error) {
-        // Обработка ошибки регистрации
-        this.errorMessage =
-          error.response.data.message ||
-          'Произошла ошибка при регистрации. Пожалуйста, попробуйте снова.';
-        console.log(error);
-      }
-    },
-  },
-};
-</script>
