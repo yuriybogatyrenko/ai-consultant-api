@@ -10,30 +10,32 @@ export class ApiKeysService {
     private apiKeysRepository: Repository<ApiKeyEntity>,
   ) {}
 
-  async createApiKey(userId: string, key: string): Promise<ApiKeyEntity> {
+  async createApiKey(accountId: string, key: string): Promise<ApiKeyEntity> {
     const apiKey: ApiKeyEntity[] = this.apiKeysRepository.create([
-      { key, user: { id: userId } },
+      { key, account: { account_id: accountId } },
     ]);
 
-    console.log(apiKey);
+    // console.log(apiKey);
 
     return this.apiKeysRepository.save(apiKey[0]);
   }
 
-  async getApiKeys(userId: string) {
-    return this.apiKeysRepository.findBy({ user: { id: userId } });
+  async getApiKeys(accountId: string) {
+    return this.apiKeysRepository.findBy({
+      account: { account_id: accountId },
+    });
   }
 
   async validateApiKey(key: string): Promise<ApiKeyEntity | null> {
     return this.apiKeysRepository.findOne({
       where: { key },
-      relations: ['user'],
+      relations: { account: true },
     });
   }
 
-  async revokeApiKey(userId: string, apiKey: string) {
+  async revokeApiKey(accountId: string, apiKey: string) {
     return this.apiKeysRepository.delete({
-      user: { id: userId },
+      account: { account_id: accountId },
       id: apiKey,
     });
   }

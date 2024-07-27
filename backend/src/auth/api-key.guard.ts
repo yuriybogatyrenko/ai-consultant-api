@@ -23,7 +23,7 @@ export class ApiKeyGuard implements CanActivate {
     }
 
     // Attach user to request
-    request.user = apiKeyRecord.user;
+    request.account = apiKeyRecord.account;
     return true;
   }
 }

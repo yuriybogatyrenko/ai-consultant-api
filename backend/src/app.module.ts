@@ -15,6 +15,10 @@ import { AuthService } from './auth/auth.service';
 import { JwtStrategy } from './auth/jwt.strategy';
 import { typeOrmConfig } from 'db/orm.config';
 import { AuthModule } from './auth/auth.module';
+import { PlatformsModule } from './platforms/platforms.module';
+import { AccountsModule } from './accounts/accounts.module';
+import { BillingModule } from './billing/billing.module';
+import { AccountTeamModule } from './account-team/account-team.module';
 
 @Module({
   imports: [
@@ -41,6 +45,10 @@ import { AuthModule } from './auth/auth.module';
     UsersModule,
     PassportModule,
     AuthModule,
+    PlatformsModule,
+    AccountsModule,
+    BillingModule,
+    AccountTeamModule,
   ],
   controllers: [AppController],
   providers: [

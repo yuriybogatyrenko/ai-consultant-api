@@ -30,4 +30,24 @@ export class AuthService {
   async register(user: UserRegistrationDto) {
     return this.usersService.register(user);
   }
+
+  async userHasPermission(
+    userId: number,
+    permissionName: string,
+  ): Promise<boolean> {
+    console.log(userId);
+    if (!userId) {
+      throw new Error('Invalid user ID');
+    }
+    const user = await this.usersService.findOneUser({
+      where: { id: userId },
+      relations: ['roles', 'roles.permissions'],
+    });
+
+    console.log(user);
+
+    return user.roles.some((role) =>
+      role.permissions.some((permission) => permission.name === permissionName),
+    );
+  }
 }

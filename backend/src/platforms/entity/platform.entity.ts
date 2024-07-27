@@ -1,27 +1,28 @@
-import { Account } from 'src/accounts/entity/account.entity';
 import {
   Column,
   CreateDateColumn,
   Entity,
-  ManyToOne,
   PrimaryGeneratedColumn,
   UpdateDateColumn,
 } from 'typeorm';
 
 @Entity()
-export class ApiKeyEntity {
+export class Platform {
   @PrimaryGeneratedColumn('uuid')
   id: string;
 
   @Column({ unique: true })
-  key: string;
+  platform_name: string;
 
-  @ManyToOne(() => Account, (account) => account.apiKeys)
-  account: Account;
+  @Column({ nullable: true })
+  description: string;
+
+  @Column({ default: false })
+  isActive: boolean;
 
   @CreateDateColumn()
-  createdAt: Date;
+  created_at: Date;
 
   @UpdateDateColumn()
-  updatedAt: Date;
+  updated_at: Date;
 }

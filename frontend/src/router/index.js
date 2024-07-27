@@ -23,6 +23,14 @@ const routes = [
             /* webpackChunkName: "cabinet-api-keys" */ '../views/cabinet/ApiKeyView.vue'
           ),
       },
+      {
+        path: 'platforms',
+        name: 'cabinet-platforms',
+        component: () =>
+          import(
+            /* webpackChunkName: "cabinet-platforms" */ '../views/cabinet/PlatformsView.vue'
+          ),
+      },
     ],
   },
   {

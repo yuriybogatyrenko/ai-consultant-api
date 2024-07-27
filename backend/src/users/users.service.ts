@@ -25,6 +25,14 @@ export class UsersService {
     });
   }
 
+  async findOneUser(options: any): Promise<UserEntity | undefined> {
+    return this.usersRepository.findOne(options);
+  }
+
+  async findOneById(id: string): Promise<UserEntity | undefined> {
+    return this.usersRepository.findOneBy({ id });
+  }
+
   async findOneByEmail(email: string): Promise<UserEntity | undefined> {
     return this.usersRepository.findOne({ where: { email } });
   }

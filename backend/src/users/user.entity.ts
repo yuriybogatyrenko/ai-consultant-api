@@ -1,14 +1,16 @@
-import { ApiKeyEntity } from 'src/api-keys/api-keys.entity';
 import {
   BeforeInsert,
   Column,
   CreateDateColumn,
   Entity,
+  JoinTable,
+  ManyToMany,
   OneToMany,
   PrimaryGeneratedColumn,
   UpdateDateColumn,
 } from 'typeorm';
 import * as bcrypt from 'bcrypt';
+import { Account } from 'src/accounts/entity/account.entity';
 
 @Entity()
 export class UserEntity {
@@ -21,17 +23,46 @@ export class UserEntity {
   @Column({ select: false })
   password: string;
 
-  @OneToMany(() => ApiKeyEntity, (ApiKeyEntity) => ApiKeyEntity.user)
-  apiKeys: ApiKeyEntity[];
+  @OneToMany(() => Account, (account) => account.owner)
+  accounts: Account[];
 
   @BeforeInsert()
   async hashPassword() {
     this.password = await bcrypt.hash(this.password, 10);
   }
 
+  @ManyToMany(() => Role, (role) => role.users)
+  @JoinTable()
+  roles: Role[];
+
   @CreateDateColumn()
   createdAt: Date;
 
   @UpdateDateColumn()
   updatedAt: Date;
+}
+
+@Entity()
+export class Role {
+  @PrimaryGeneratedColumn()
+  id: number;
+
+  @Column({ type: 'varchar', nullable: true })
+  name: string;
+
+  @ManyToMany(() => Permission)
+  @JoinTable()
+  permissions: Permission[];
+
+  @ManyToMany(() => UserEntity, (user) => user.roles)
+  users: UserEntity[];
+}
+
+@Entity()
+export class Permission {
+  @PrimaryGeneratedColumn()
+  id: number;
+
+  @Column()
+  name: string;
 }
