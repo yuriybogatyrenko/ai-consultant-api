@@ -2,34 +2,32 @@ import { Account } from 'src/accounts/entity/account.entity';
 import {
   Entity,
   PrimaryGeneratedColumn,
-  ManyToOne,
-  JoinColumn,
   Column,
   CreateDateColumn,
   UpdateDateColumn,
+  OneToOne,
 } from 'typeorm';
 
 @Entity()
-export class WhatsAppSetting {
+export class PlatformWhatsAppSetting {
   @PrimaryGeneratedColumn('uuid')
   id: string;
 
-  @ManyToOne(() => Account, (account) => account.whatsappSettings)
-  @JoinColumn()
+  @OneToOne(() => Account, (account) => account.whatsapp_settings)
   account: Account;
 
   @Column()
-  accessToken: string;
+  access_token: string;
 
   @Column()
-  phoneNumberId: string;
+  phone_number_id: string;
 
   @Column({ type: 'boolean', default: false })
-  isActive: boolean;
+  is_active: boolean;
 
   @CreateDateColumn()
-  connectedAt: Date;
+  connected_at: Date;
 
   @UpdateDateColumn()
-  updatedAt: Date;
+  updated_at: Date;
 }

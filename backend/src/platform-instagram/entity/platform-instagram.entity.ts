@@ -2,34 +2,43 @@ import { Account } from 'src/accounts/entity/account.entity';
 import {
   Entity,
   PrimaryGeneratedColumn,
-  ManyToOne,
   JoinColumn,
   Column,
   CreateDateColumn,
   UpdateDateColumn,
+  OneToOne,
 } from 'typeorm';
 
 @Entity()
-export class TelegramSetting {
+export class PlatformInstagramSetting {
   @PrimaryGeneratedColumn('uuid')
   id: string;
 
-  @ManyToOne(() => Account, (account) => account.telegramSettings)
+  @OneToOne(() => Account, (acocunt) => acocunt.instagram_settings)
   @JoinColumn()
   account: Account;
 
   @Column()
-  accessToken: string;
+  access_token: string;
 
   @Column()
-  botUsername: string;
+  instagram_user_id: string;
+
+  @Column()
+  instagram_username: string;
+
+  @Column()
+  token_type: string;
+
+  @Column()
+  expires_in: number;
 
   @Column({ type: 'boolean', default: false })
-  isActive: boolean;
+  is_active: boolean;
 
   @CreateDateColumn()
-  connectedAt: Date;
+  connected_at: Date;
 
   @UpdateDateColumn()
-  updatedAt: Date;
+  updated_at: Date;
 }

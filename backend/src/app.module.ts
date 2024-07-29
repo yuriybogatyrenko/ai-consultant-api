@@ -15,10 +15,13 @@ import { AuthService } from './auth/auth.service';
 import { JwtStrategy } from './auth/jwt.strategy';
 import { typeOrmConfig } from 'db/orm.config';
 import { AuthModule } from './auth/auth.module';
-import { PlatformsModule } from './platforms/platforms.module';
 import { AccountsModule } from './accounts/accounts.module';
 import { BillingModule } from './billing/billing.module';
 import { AccountTeamModule } from './account-team/account-team.module';
+import { ContactsModule } from './contacts/contacts.module';
+import { PlatformTelegramModule } from './platform-telegram/platform-telegram.module';
+import { PlatformWhatsappModule } from './platform-whatsapp/platform-whatsapp.module';
+import { PlatformInstagramModule } from './platform-instagram/platform-instagram.module';
 
 @Module({
   imports: [
@@ -45,10 +48,13 @@ import { AccountTeamModule } from './account-team/account-team.module';
     UsersModule,
     PassportModule,
     AuthModule,
-    PlatformsModule,
     AccountsModule,
     BillingModule,
     AccountTeamModule,
+    ContactsModule,
+    PlatformTelegramModule,
+    PlatformWhatsappModule,
+    PlatformInstagramModule,
   ],
   controllers: [AppController],
   providers: [

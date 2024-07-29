@@ -4,7 +4,9 @@ import {
   Column,
   CreateDateColumn,
   UpdateDateColumn,
+  OneToMany,
 } from 'typeorm';
+import { Subscription } from './billing-subscription.entity';
 
 @Entity()
 export class Plan {
@@ -20,9 +22,12 @@ export class Plan {
   @Column()
   description: string;
 
+  @OneToMany(() => Subscription, (subscription) => subscription.plan)
+  subscriptions: Subscription[];
+
   @CreateDateColumn()
-  createdAt: Date;
+  created_at: Date;
 
   @UpdateDateColumn()
-  updatedAt: Date;
+  updated_at: Date;
 }

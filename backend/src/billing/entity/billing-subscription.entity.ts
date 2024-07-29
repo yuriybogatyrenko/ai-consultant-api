@@ -18,7 +18,7 @@ export class Subscription {
   subscription_id: string;
 
   @ManyToOne(() => Account, (account) => account.subscriptions)
-  @JoinColumn()
+  @JoinColumn({ name: 'account_id' })
   account: Account;
 
   @OneToMany(() => Payment, (payment) => payment.subscription)

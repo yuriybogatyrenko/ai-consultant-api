@@ -54,9 +54,9 @@ export default {
           route: { name: 'cabinet-api-keys' },
         },
         {
-          title: 'Платформы',
+          title: 'Аккаунты',
           icon: 'mdi-package-variant',
-          route: { name: 'cabinet-platforms' },
+          route: { name: 'cabinet-accounts' },
         },
         {
           title: 'Активности',

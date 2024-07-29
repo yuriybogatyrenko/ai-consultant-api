@@ -15,7 +15,7 @@ export class AccountTeamMember {
   @PrimaryGeneratedColumn()
   member_id: number;
 
-  @ManyToOne(() => Account, (account) => account.teamMembers)
+  @ManyToOne(() => Account, (account) => account.team_members)
   @JoinColumn({ name: 'account_id' })
   account: Account;
 

@@ -2,9 +2,10 @@ import { AccountTeamMember } from 'src/account-team/entity/account-team-member.e
 import { ApiKeyEntity } from 'src/api-keys/api-keys.entity';
 import { Payment } from 'src/billing/entity/billing-payment.entity';
 import { Subscription } from 'src/billing/entity/billing-subscription.entity';
-import { InstagramSetting } from 'src/platforms/entity/platform-instagram.entity';
-import { TelegramSetting } from 'src/platforms/entity/platform-telegram.entity';
-import { WhatsAppSetting } from 'src/platforms/entity/platform-whatsapp-settings.entity';
+import { Contact } from 'src/contacts/entity/contact.entity';
+import { PlatformInstagramSetting } from 'src/platform-instagram/entity/platform-instagram.entity';
+import { PlatformTelegramSetting } from 'src/platform-telegram/entity/platform-telegram.entity';
+import { PlatformWhatsAppSetting } from 'src/platform-whatsapp/entity/platform-whatsapp.entity';
 import { UserEntity } from 'src/users/user.entity';
 import {
   Column,
@@ -13,6 +14,7 @@ import {
   JoinColumn,
   ManyToOne,
   OneToMany,
+  OneToOne,
   PrimaryGeneratedColumn,
   UpdateDateColumn,
 } from 'typeorm';
@@ -33,16 +35,16 @@ export class Account {
   owner: UserEntity;
 
   @OneToMany(() => ApiKeyEntity, (apiKey) => apiKey.account)
-  apiKeys: ApiKeyEntity[];
+  api_keys: ApiKeyEntity[];
 
-  @OneToMany(() => TelegramSetting, (setting) => setting.account)
-  telegramSettings: TelegramSetting[];
+  @OneToOne(() => PlatformTelegramSetting, (setting) => setting.account)
+  telegram_settings: PlatformTelegramSetting;
 
-  @OneToMany(() => WhatsAppSetting, (setting) => setting.account)
-  whatsappSettings: WhatsAppSetting[];
+  @OneToOne(() => PlatformWhatsAppSetting, (setting) => setting.account)
+  whatsapp_settings: PlatformWhatsAppSetting;
 
-  @OneToMany(() => InstagramSetting, (setting) => setting.account)
-  instagramSettings: InstagramSetting[];
+  @OneToOne(() => PlatformInstagramSetting, (setting) => setting.account)
+  instagram_settings: PlatformInstagramSetting;
 
   @OneToMany(() => Payment, (payment) => payment.account)
   payments: Payment[];
@@ -51,11 +53,14 @@ export class Account {
   subscriptions: Subscription[];
 
   @OneToMany(() => AccountTeamMember, (member) => member.account)
-  teamMembers: AccountTeamMember[];
+  team_members: AccountTeamMember[];
+
+  @OneToMany(() => Contact, (contact) => contact.account)
+  contacts: Contact[];
 
   @CreateDateColumn()
-  createdAt: Date;
+  created_at: Date;
 
   @UpdateDateColumn()
-  updatedAt: Date;
+  updated_at: Date;
 }

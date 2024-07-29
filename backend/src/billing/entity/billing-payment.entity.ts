@@ -15,11 +15,11 @@ export class Payment {
   payment_id: string;
 
   @ManyToOne(() => Account, (account) => account.payments)
-  @JoinColumn()
+  @JoinColumn({ name: 'account_id' })
   account: Account;
 
   @ManyToOne(() => Subscription, (subscription) => subscription.payments)
-  @JoinColumn()
+  @JoinColumn({ name: 'subscription_id' })
   subscription: Subscription;
 
   @Column()
@@ -29,14 +29,14 @@ export class Payment {
   currency: string;
 
   @Column()
-  paymentMethod: string;
+  payment_method: string;
 
   @Column()
-  paymentStatus: string;
+  payment_status: string;
 
   @Column()
-  transactionId: string;
+  transaction_id: string;
 
   @CreateDateColumn()
-  paymentDate: Date;
+  payment_date: Date;
 }

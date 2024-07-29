@@ -3,6 +3,20 @@ import HomeView from '../views/HomeView.vue';
 
 const routes = [
   {
+    path: '/auth/login',
+    name: 'login',
+    component: () =>
+      import(/* webpackChunkName: "login" */ '../views/auth/LoginView.vue'),
+  },
+  {
+    path: '/auth/register',
+    name: 'register',
+    component: () =>
+      import(
+        /* webpackChunkName: "register" */ '../views/auth/RegisterView.vue'
+      ),
+  },
+  {
     path: '/',
     name: 'home',
     component: HomeView,
@@ -20,32 +34,18 @@ const routes = [
         name: 'cabinet-api-keys',
         component: () =>
           import(
-            /* webpackChunkName: "cabinet-api-keys" */ '../views/cabinet/ApiKeyView.vue'
+            /* webpackChunkName: "cabinet-api-keys" */ '../views/cabinet/api-keys/ApiKeyView.vue'
           ),
       },
       {
-        path: 'platforms',
-        name: 'cabinet-platforms',
+        path: 'accounts',
+        name: 'cabinet-accounts',
         component: () =>
           import(
-            /* webpackChunkName: "cabinet-platforms" */ '../views/cabinet/PlatformsView.vue'
+            /* webpackChunkName: "cabinet-accounts" */ '../views/cabinet/account/AccountView.vue'
           ),
       },
     ],
-  },
-  {
-    path: '/auth/login',
-    name: 'login',
-    component: () =>
-      import(/* webpackChunkName: "login" */ '../views/auth/LoginView.vue'),
-  },
-  {
-    path: '/auth/register',
-    name: 'register',
-    component: () =>
-      import(
-        /* webpackChunkName: "register" */ '../views/auth/RegisterView.vue'
-      ),
   },
 ];
 

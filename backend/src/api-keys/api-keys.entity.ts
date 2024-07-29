@@ -16,12 +16,12 @@ export class ApiKeyEntity {
   @Column({ unique: true })
   key: string;
 
-  @ManyToOne(() => Account, (account) => account.apiKeys)
+  @ManyToOne(() => Account, (account) => account.api_keys)
   account: Account;
 
   @CreateDateColumn()
-  createdAt: Date;
+  created_at: Date;
 
   @UpdateDateColumn()
-  updatedAt: Date;
+  updated_at: Date;
 }
