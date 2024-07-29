@@ -22,27 +22,34 @@ const routes = [
     component: HomeView,
   },
   {
-    path: '/cabinet',
-    name: 'cabinet',
+    path: '/',
     component: () =>
       import(
         /* webpackChunkName: "cabinet" */ '../views/cabinet/CabinetLayout.vue'
       ),
     children: [
       {
+        path: 'accounts',
+        name: 'cabinet-accounts',
+        component: () =>
+          import(
+            /* webpackChunkName: "cabinet-accounts" */ '../views/cabinet/account/AccountsView.vue'
+          ),
+      },
+      {
+        path: 'account/:id',
+        name: 'cabinet-account',
+        component: () =>
+          import(
+            /* webpackChunkName: "cabinet-accounts" */ '../views/cabinet/account/AccountView.vue'
+          ),
+      },
+      {
         path: 'api-keys',
         name: 'cabinet-api-keys',
         component: () =>
           import(
             /* webpackChunkName: "cabinet-api-keys" */ '../views/cabinet/api-keys/ApiKeyView.vue'
-          ),
-      },
-      {
-        path: 'accounts',
-        name: 'cabinet-accounts',
-        component: () =>
-          import(
-            /* webpackChunkName: "cabinet-accounts" */ '../views/cabinet/account/AccountView.vue'
           ),
       },
     ],

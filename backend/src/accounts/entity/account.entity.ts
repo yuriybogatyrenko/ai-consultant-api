@@ -37,19 +37,30 @@ export class Account {
   @OneToMany(() => ApiKeyEntity, (apiKey) => apiKey.account)
   api_keys: ApiKeyEntity[];
 
-  @OneToOne(() => PlatformTelegramSetting, (setting) => setting.account)
+  @OneToOne(() => PlatformTelegramSetting, (setting) => setting.account, {
+    eager: true,
+  })
+  @JoinColumn()
   telegram_settings: PlatformTelegramSetting;
 
-  @OneToOne(() => PlatformWhatsAppSetting, (setting) => setting.account)
+  @OneToOne(() => PlatformWhatsAppSetting, (setting) => setting.account, {
+    eager: true,
+  })
+  @JoinColumn()
   whatsapp_settings: PlatformWhatsAppSetting;
 
-  @OneToOne(() => PlatformInstagramSetting, (setting) => setting.account)
+  @OneToOne(() => PlatformInstagramSetting, (setting) => setting.account, {
+    eager: true,
+  })
+  @JoinColumn()
   instagram_settings: PlatformInstagramSetting;
 
   @OneToMany(() => Payment, (payment) => payment.account)
   payments: Payment[];
 
-  @OneToMany(() => Subscription, (subscription) => subscription.account)
+  @OneToMany(() => Subscription, (subscription) => subscription.account, {
+    eager: true,
+  })
   subscriptions: Subscription[];
 
   @OneToMany(() => AccountTeamMember, (member) => member.account)
@@ -57,6 +68,9 @@ export class Account {
 
   @OneToMany(() => Contact, (contact) => contact.account)
   contacts: Contact[];
+
+  @Column({ nullable: true })
+  gpt_api_key: string;
 
   @CreateDateColumn()
   created_at: Date;

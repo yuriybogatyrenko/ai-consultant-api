@@ -1,142 +1,82 @@
 <template>
-  <v-container>
-    <v-row>
-      <v-col cols="12">
-        <h1>Создать аккаунт</h1>
-        <v-form @submit.prevent="createAccount">
-          <v-text-field
-            v-model="account.title"
-            label="Название"
-            required
-          ></v-text-field>
-          <v-text-field
-            v-model="account.description"
-            label="Описание"
-          ></v-text-field>
-          <v-btn type="submit" color="primary">Создать</v-btn>
-        </v-form>
-      </v-col>
-    </v-row>
+  <v-col cols="12">
+    <h3>Подключения</h3>
+    <v-expansion-panels>
+      <v-expansion-panel>
+        <v-expansion-panel-header>Telegram</v-expansion-panel-header>
+        <v-expansion-panel-content>
+          <v-list>
+            <v-list-item v-if="account.telegram_settings">
+              <v-list-item-content>
+                <v-list-item-title>{{
+                  account.telegram_settings.bot_username
+                }}</v-list-item-title>
+              </v-list-item-content>
+            </v-list-item>
+          </v-list>
+        </v-expansion-panel-content>
+        <v-btn @click.prevent="showTelegramForm = true">Add settings</v-btn>
 
-    <v-row v-if="accountData">
-      <v-col cols="12">
-        <h2>Настройки аккаунта</h2>
-        <v-list>
-          <v-list-item>
-            <v-list-item-content>
-              <v-list-item-title>Название:</v-list-item-title>
-              <v-list-item-subtitle>{{
-                accountData.title
-              }}</v-list-item-subtitle>
-            </v-list-item-content>
-          </v-list-item>
-          <v-list-item>
-            <v-list-item-content>
-              <v-list-item-title>Описание:</v-list-item-title>
-              <v-list-item-subtitle>{{
-                accountData.description
-              }}</v-list-item-subtitle>
-            </v-list-item-content>
-          </v-list-item>
-          <v-list-item>
-            <v-list-item-content>
-              <v-list-item-title>Владелец:</v-list-item-title>
-              <v-list-item-subtitle>{{
-                accountData.owner?.name
-              }}</v-list-item-subtitle>
-            </v-list-item-content>
-          </v-list-item>
-        </v-list>
-      </v-col>
+        <TelegramSettingsForm
+          :telegram_settings="account.telegram_settings"
+          v-if="showTelegramForm"
+        ></TelegramSettingsForm>
+      </v-expansion-panel>
 
-      <v-col cols="12">
-        <h3>Подключения</h3>
-        <v-expansion-panels>
-          <v-expansion-panel>
-            <v-expansion-panel-header>Telegram</v-expansion-panel-header>
-            <v-expansion-panel-content>
-              <v-list>
-                <v-list-item v-if="accountData.telegram_settings">
-                  <v-list-item-content>
-                    <v-list-item-title>{{
-                      accountData.telegram_settings.bot_username
-                    }}</v-list-item-title>
-                  </v-list-item-content>
-                </v-list-item>
-              </v-list>
-            </v-expansion-panel-content>
-          </v-expansion-panel>
+      <v-expansion-panel>
+        <v-expansion-panel-header>WhatsApp</v-expansion-panel-header>
+        <v-expansion-panel-content>
+          <v-list>
+            <v-list-item v-if="account.whatsapp_settings">
+              <v-list-item-content>
+                <v-list-item-title>{{
+                  account.whatsapp_settings.phone_number_id
+                }}</v-list-item-title>
+              </v-list-item-content>
+            </v-list-item>
+          </v-list>
+        </v-expansion-panel-content>
+      </v-expansion-panel>
 
-          <v-expansion-panel>
-            <v-expansion-panel-header>WhatsApp</v-expansion-panel-header>
-            <v-expansion-panel-content>
-              <v-list>
-                <v-list-item v-if="accountData.whatsapp_settings">
-                  <v-list-item-content>
-                    <v-list-item-title>{{
-                      accountData.whatsapp_settings.phone_number_id
-                    }}</v-list-item-title>
-                  </v-list-item-content>
-                </v-list-item>
-              </v-list>
-            </v-expansion-panel-content>
-          </v-expansion-panel>
-
-          <v-expansion-panel>
-            <v-expansion-panel-header>Instagram</v-expansion-panel-header>
-            <v-expansion-panel-content>
-              <v-list>
-                <v-list-item v-if="accountData.instagram_settings">
-                  <v-list-item-content>
-                    <v-list-item-title>{{
-                      accountData.instagram_settings.instagram_username
-                    }}</v-list-item-title>
-                  </v-list-item-content>
-                </v-list-item>
-              </v-list>
-            </v-expansion-panel-content>
-          </v-expansion-panel>
-        </v-expansion-panels>
-      </v-col>
-    </v-row>
-  </v-container>
+      <v-expansion-panel>
+        <v-expansion-panel-header>Instagram</v-expansion-panel-header>
+        <v-expansion-panel-content>
+          <v-list>
+            <v-list-item v-if="account.instagram_settings">
+              <v-list-item-content>
+                <v-list-item-title>{{
+                  account.instagram_settings.instagram_username
+                }}</v-list-item-title>
+              </v-list-item-content>
+            </v-list-item>
+          </v-list>
+        </v-expansion-panel-content>
+      </v-expansion-panel>
+    </v-expansion-panels>
+  </v-col>
 </template>
 
 <script>
 import api from '@/api.service';
+import TelegramSettingsForm from './components/telegram-settings-form.vue';
+
 export default {
+  components: { TelegramSettingsForm },
   data() {
     return {
-      account: {
-        title: '',
-        description: '',
-      },
-      accountData: null,
+      showTelegramForm: false,
+      account: {},
     };
   },
+  async mounted() {
+    await this.getAccount();
+  },
   methods: {
-    async createAccount() {
-      try {
-        const response = await api.post('/accounts', this.account);
-        const data = response;
-        this.accountData = data;
-      } catch (error) {
-        console.error('Ошибка при создании аккаунта:', error);
-      }
-    },
-    async getAccounts() {
-      try {
-        const response = await api.get('/accounts');
-        const data = response.data;
-        this.accountData = data;
-      } catch (error) {
-        console.error('Ошибка при получении аккаунтов:', error);
-      }
+    async getAccount() {
+      const id = this.$route.params.id;
+      const response = await api.get(`/accounts/${id}`);
+      this.account = response.data;
     },
   },
 };
 </script>
-
-<style scoped>
-/* Добавьте стили по необходимости */
-</style>
