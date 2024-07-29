@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { DeleteResult, Repository } from 'typeorm';
 import { Plan } from './entity/billing-plan.entity';
@@ -14,21 +14,33 @@ export class PlansService {
     return this.plansRepository.find();
   }
 
-  findOne(plan_id: string): Promise<Plan> {
-    return this.plansRepository.findOneBy({ plan_id });
+  async findOne(planId: string): Promise<Plan> {
+    const plan = await this.plansRepository.findOneBy({ plan_id: planId });
+    if (!plan) {
+      throw new NotFoundException(`Plan with ID ${planId} not found`);
+    }
+    return plan;
   }
 
-  create(plan: Plan): Promise<Plan> {
-    return this.plansRepository.save(plan);
+  async create(plan: Plan): Promise<Plan> {
+    return await this.plansRepository.save(plan);
   }
 
-  async update(plan_id: string, updatedPlan: Partial<Plan>): Promise<Plan> {
-    return this.plansRepository.update(plan_id, updatedPlan).then(() => {
-      return this.plansRepository.findOneBy({ plan_id });
-    });
+  async update(planId: string, updatedPlan: Partial<Plan>): Promise<Plan> {
+    await this.plansRepository.update(planId, updatedPlan);
+    const plan = await this.plansRepository.findOneBy({ plan_id: planId });
+    if (!plan) {
+      throw new NotFoundException(
+        `Plan with ID ${planId} not found after update`,
+      );
+    }
+    return plan;
   }
 
-  delete(id: string): Promise<DeleteResult> {
-    return this.plansRepository.delete(id);
+  async delete(planId: string): Promise<void> {
+    const deleteResult = await this.plansRepository.delete(planId);
+    if (!deleteResult.affected) {
+      throw new NotFoundException(`Plan with ID ${planId} not found`);
+    }
   }
 }

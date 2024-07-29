@@ -18,32 +18,48 @@ export class AccountsService {
     return this.accountsRepository.find();
   }
 
-  findOne(account_id: string): Promise<Account> {
-    return this.accountsRepository.findOneBy({ account_id });
+  async findOne(accountId: string): Promise<Account> {
+    const account = await this.accountsRepository.findOneBy({
+      account_id: accountId,
+    });
+    if (!account) {
+      throw new NotFoundException(`Account not found`);
+    }
+    return account;
   }
 
   async create(
     createAccountDto: CreateAccountDto,
-    user_id: string,
+    userId: string,
   ): Promise<Account> {
-    const user = await this.usersService.findOneById(user_id);
+    const user = await this.usersService.findOneById(userId);
     if (!user) {
       throw new NotFoundException('User not found');
     }
-    const account = this.accountsRepository.create(createAccountDto);
-    account.owner = user;
+    const account = this.accountsRepository.create({
+      ...createAccountDto,
+      owner: user,
+    });
     return this.accountsRepository.save(account);
   }
 
   async update(
-    account_id: string,
+    accountId: string,
     updateAccountDto: UpdateAccountDto,
   ): Promise<Account> {
-    await this.accountsRepository.update(account_id, updateAccountDto);
-    return this.accountsRepository.findOneBy({ account_id });
+    const account = await this.accountsRepository.preload({
+      account_id: accountId,
+      ...updateAccountDto,
+    });
+    if (!account) {
+      throw new NotFoundException(`Account not found`);
+    }
+
+    return this.accountsRepository.save(account);
   }
 
-  async remove(account_id: string): Promise<void> {
-    await this.accountsRepository.delete(account_id);
+  async remove(accountId: string): Promise<void> {
+    const account = await this.findOne(accountId);
+    await this.accountsRepository.remove(account);
   }
 }

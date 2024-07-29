@@ -19,8 +19,8 @@ export class Plan {
   @Column()
   price: number;
 
-  @Column()
-  description: string;
+  @Column({ nullable: true })
+  description?: string;
 
   @OneToMany(() => Subscription, (subscription) => subscription.plan)
   subscriptions: Subscription[];

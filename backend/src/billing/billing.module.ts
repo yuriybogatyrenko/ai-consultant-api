@@ -9,9 +9,13 @@ import { SubscriptionsController } from './subscriptions.controller';
 import { PaymentsService } from './payments.service';
 import { PlansService } from './plans.service';
 import { SubscriptionsService } from './subscriptions.service';
+import { AuthModule } from 'src/auth/auth.module';
 
 @Module({
-  imports: [TypeOrmModule.forFeature([Payment, Subscription, Plan])],
+  imports: [
+    TypeOrmModule.forFeature([Payment, Subscription, Plan]),
+    AuthModule,
+  ],
   providers: [PaymentsService, PlansService, SubscriptionsService],
   controllers: [PaymentsController, PlansController, SubscriptionsController],
   exports: [PaymentsService, PlansService, SubscriptionsService],

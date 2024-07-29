@@ -35,6 +35,9 @@ export class UserEntity {
   @JoinTable()
   roles: Role[];
 
+  @Column({ type: 'enum', enum: ['admin', 'user'], default: 'user' })
+  user_type: string;
+
   @CreateDateColumn()
   created_at: Date;
 
