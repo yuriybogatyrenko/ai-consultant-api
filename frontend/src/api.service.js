@@ -22,7 +22,7 @@ api.interceptors.request.use(
 );
 
 api.interceptors.response.use(
-  (response) => response,
+  (response) => response.data,
   (error) => {
     if (error.response && error.response.status === 401) {
       authService.removeToken();

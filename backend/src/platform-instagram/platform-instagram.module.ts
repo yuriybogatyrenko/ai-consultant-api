@@ -8,5 +8,6 @@ import { PlatformInstagramSetting } from './entity/platform-instagram.entity';
   imports: [TypeOrmModule.forFeature([PlatformInstagramSetting])],
   controllers: [PlatformInstagramController],
   providers: [PlatformInstagramService],
+  exports: [PlatformInstagramService],
 })
 export class PlatformInstagramModule {}

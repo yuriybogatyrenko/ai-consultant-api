@@ -22,6 +22,7 @@ import { ContactsModule } from './contacts/contacts.module';
 import { PlatformTelegramModule } from './platform-telegram/platform-telegram.module';
 import { PlatformWhatsappModule } from './platform-whatsapp/platform-whatsapp.module';
 import { PlatformInstagramModule } from './platform-instagram/platform-instagram.module';
+import { GptApiModule } from './gpt-api/gpt-api.module';
 
 @Module({
   imports: [
@@ -55,6 +56,7 @@ import { PlatformInstagramModule } from './platform-instagram/platform-instagram
     PlatformTelegramModule,
     PlatformWhatsappModule,
     PlatformInstagramModule,
+    GptApiModule,
   ],
   controllers: [AppController],
   providers: [

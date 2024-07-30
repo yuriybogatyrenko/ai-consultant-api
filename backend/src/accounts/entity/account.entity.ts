@@ -30,7 +30,7 @@ export class Account {
   @Column({ nullable: true })
   description: string;
 
-  @ManyToOne(() => UserEntity, (user) => user.accounts)
+  @ManyToOne(() => UserEntity, (user) => user.accounts, { eager: true })
   @JoinColumn()
   owner: UserEntity;
 

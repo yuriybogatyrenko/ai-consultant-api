@@ -3,6 +3,18 @@
     <h3>Подключения</h3>
     <v-expansion-panels>
       <v-expansion-panel>
+        <v-expansion-panel-header>GPT</v-expansion-panel-header>
+        <v-expansion-panel-content>
+          <v-text-field
+            v-model="accountSettings.gpt_api_key"
+            label="API Key"
+            required
+          />
+          <v-btn @click.prevent="saveGptKey">Save</v-btn>
+        </v-expansion-panel-content>
+      </v-expansion-panel>
+
+      <v-expansion-panel>
         <v-expansion-panel-header>Telegram</v-expansion-panel-header>
         <v-expansion-panel-content>
           <v-list>
@@ -15,10 +27,18 @@
             </v-list-item>
           </v-list>
         </v-expansion-panel-content>
+
+        <v-switch
+          v-model="accountSettings.telegram.is_active"
+          color="success"
+          label="Is Active"
+          @change="toggleTelegram($event)"
+        ></v-switch>
         <v-btn @click.prevent="showTelegramForm = true">Add settings</v-btn>
 
         <TelegramSettingsForm
-          :telegram_settings="account.telegram_settings"
+          @save="saveTelegramSettings"
+          :telegram-settings="account.telegram_settings"
           v-if="showTelegramForm"
         ></TelegramSettingsForm>
       </v-expansion-panel>
@@ -66,6 +86,12 @@ export default {
     return {
       showTelegramForm: false,
       account: {},
+      accountSettings: {
+        telegram: {
+          is_active: false,
+        },
+        gpt_api_key: '',
+      },
     };
   },
   async mounted() {
@@ -74,8 +100,35 @@ export default {
   methods: {
     async getAccount() {
       const id = this.$route.params.id;
-      const response = await api.get(`/accounts/${id}`);
-      this.account = response.data;
+      this.account = await api.get(`/accounts/${id}`).then((response) => {
+        this.accountSettings.telegram.is_active =
+          response.telegram_settings.is_active;
+        this.accountSettings.gpt_api_key = response.gpt_api_key;
+        return response;
+      });
+    },
+    async saveTelegramSettings(data) {
+      this.account = await api.post(
+        `/accounts/${this.$route.params.id}/telegram-settings`,
+        data,
+      );
+      this.showTelegramForm = false;
+    },
+    async toggleTelegram() {
+      try {
+        await api.post('/platform-telegram/toggle', {
+          id: this.account.telegram_settings.id,
+          isActive: this.accountSettings.telegram.is_active,
+        });
+      } catch (error) {
+        this.accountSettings.telegram.is_active =
+          !this.accountSettings.telegram.is_active;
+      }
+    },
+    saveGptKey() {
+      api.post(`/accounts/${this.$route.params.id}/gpt-api-key`, {
+        gpt_api_key: this.accountSettings.gpt_api_key,
+      });
     },
   },
 };

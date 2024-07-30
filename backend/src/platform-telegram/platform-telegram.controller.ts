@@ -1,4 +1,33 @@
-import { Controller } from '@nestjs/common';
+import {
+  BadRequestException,
+  Body,
+  Controller,
+  Get,
+  Param,
+  Post,
+  UseGuards,
+} from '@nestjs/common';
+import { PlatformTelegramService } from './platform-telegram.service';
+import { GetUser } from 'src/users/decoratorts/user.decorator';
+import { JwtAuthGuard } from 'src/auth/jwt-auth.guard';
+import { CreateTelegramSettingsDto } from './dto/create-telegram-settings.dto';
 
 @Controller('platform-telegram')
-export class PlatformTelegramController {}
+export class PlatformTelegramController {
+  constructor(private readonly telegramService: PlatformTelegramService) {}
+
+  @UseGuards(JwtAuthGuard)
+  @Post('/toggle')
+  async togglePlatform(
+    @GetUser('userId') userId: string,
+    @Body() CreateTelegramSettingsDto: Partial<CreateTelegramSettingsDto>,
+  ) {
+    if (!CreateTelegramSettingsDto.id) {
+      throw new BadRequestException('Bot ID is required');
+    }
+    return this.telegramService.togglePlatform(
+      userId,
+      CreateTelegramSettingsDto,
+    );
+  }
+}

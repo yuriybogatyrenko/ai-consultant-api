@@ -50,4 +50,17 @@ export class AccountsController {
   async remove(@Param('id') id: string): Promise<void> {
     return this.accountsService.remove(id);
   }
+
+  @Post(':accountId/telegram-settings')
+  async saveTelegramSettings(
+    @GetUser('userId') userId: string,
+    @Param('accountId') accountId: string,
+    @Body() settings: any,
+  ): Promise<Account> {
+    return this.accountsService.saveTelegramSettings(
+      userId,
+      accountId,
+      settings,
+    );
+  }
 }

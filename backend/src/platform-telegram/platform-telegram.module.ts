@@ -8,5 +8,6 @@ import { PlatformTelegramSetting } from './entity/platform-telegram.entity';
   imports: [TypeOrmModule.forFeature([PlatformTelegramSetting])],
   controllers: [PlatformTelegramController],
   providers: [PlatformTelegramService],
+  exports: [PlatformTelegramService],
 })
 export class PlatformTelegramModule {}

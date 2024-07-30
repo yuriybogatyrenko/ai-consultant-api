@@ -15,19 +15,12 @@
         required
       ></v-text-field>
 
-      <v-switch
-        v-model="settings.is_active"
-        color="success"
-        label="Is Active"
-        @change="saveSettings"
-      ></v-switch>
-
       <v-btn :disabled="!valid" color="primary" @click="saveSettings"
         >Save</v-btn
       >
     </v-form>
 
-    <pre>{{ this.settings }}</pre>
+    <pre>{{ settings }}</pre>
   </v-container>
 </template>
 
@@ -35,7 +28,7 @@
 export default {
   name: 'TelegramSettingsForm',
   props: {
-    telegramSettings: Object,
+    telegramSettings: { type: Object, required: true },
   },
   data() {
     return {
@@ -49,6 +42,9 @@ export default {
         required: (value) => !!value || 'Required.',
       },
     };
+  },
+  mounted() {
+    this.settings = { ...this.telegramSettings };
   },
   methods: {
     async saveSettings() {

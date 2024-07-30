@@ -15,7 +15,7 @@ export class PlatformTelegramSetting {
   id: string;
 
   @OneToOne(() => Account, (account) => account.telegram_settings)
-  @JoinColumn()
+  @JoinColumn({ name: 'account_id' })
   account: Account;
 
   @Column()

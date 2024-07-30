@@ -8,5 +8,6 @@ import { PlatformWhatsAppSetting } from './entity/platform-whatsapp.entity';
   imports: [TypeOrmModule.forFeature([PlatformWhatsAppSetting])],
   controllers: [PlatformWhatsappController],
   providers: [PlatformWhatsappService],
+  exports: [PlatformWhatsappService],
 })
 export class PlatformWhatsappModule {}
