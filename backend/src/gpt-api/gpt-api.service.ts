@@ -14,7 +14,7 @@ export class GptApiService {
     if (account.owner.id !== userId) {
       throw new UnauthorizedException('Unauthorized');
     }
-    // const openai = new OpenAI({apiKey: })
+    const openai = new OpenAI({ apiKey: account.gpt_api_key });
 
     return account;
   }
