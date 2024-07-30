@@ -21,7 +21,7 @@
     <template v-if="accounts && accounts.length > 0">
       <h2>Настройки аккаунта</h2>
       <v-row>
-        <v-col cols="4" v-for="account in accounts" :key="account.id">
+        <v-col cols="4" v-for="account in accounts" :key="account.account_id">
           <v-list>
             <v-list-item>
               <v-list-item-content>
@@ -42,7 +42,7 @@
           <v-btn
             :to="{
               name: 'cabinet-account',
-              params: { id: account.account_id },
+              params: { account_id: account.account_id },
             }"
             >Перейти в аккаунт</v-btn
           >
@@ -71,8 +71,7 @@ export default {
     async createAccount() {
       try {
         const response = await api.post('/accounts', this.account);
-        const data = response.data;
-        this.accounts = data;
+        this.accounts = response;
       } catch (error) {
         console.error('Ошибка при создании аккаунта:', error);
       }
@@ -80,8 +79,7 @@ export default {
     async getAccounts() {
       try {
         const response = await api.get('/accounts');
-        const data = response.data;
-        this.accounts = data;
+        this.accounts = response;
       } catch (error) {
         console.error('Ошибка при получении аккаунтов:', error);
       }

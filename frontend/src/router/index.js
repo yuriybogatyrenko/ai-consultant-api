@@ -37,11 +37,19 @@ const routes = [
           ),
       },
       {
-        path: 'account/:id',
+        path: 'accounts/:account_id',
         name: 'cabinet-account',
         component: () =>
           import(
             /* webpackChunkName: "cabinet-accounts" */ '../views/cabinet/account/AccountView.vue'
+          ),
+      },
+      {
+        path: 'accounts/:account_id/gpt-settings',
+        name: 'gpt-settings',
+        component: () =>
+          import(
+            /* webpackChunkName: "gpt-settings" */ '../views/cabinet/gpt-api/GptApiView.vue'
           ),
       },
       {

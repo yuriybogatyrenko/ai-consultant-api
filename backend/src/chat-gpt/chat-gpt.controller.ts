@@ -138,15 +138,13 @@ export class ChatGptController {
                     })
                     .toPromise();
 
-                  // console.log(response.data);
+                  // console.log(responsea);
                   if (response) {
                     console.log('######### response from backend #########');
-                    console.log(response.data);
+                    console.log(response);
                     return {
                       tool_call_id: tool_call.id,
-                      output: response.data
-                        ? JSON.stringify(response.data)
-                        : '',
+                      output: response ? JSON.stringify(response) : '',
                     };
                   } else {
                     return {

@@ -51,7 +51,7 @@ export default {
       try {
         const { email, password } = this.form;
         const authDetails = await api.post('/auth/login', { email, password });
-        authService.saveToken(authDetails.data.access_token);
+        authService.saveToken(authDetails.access_token);
         this.$router.push({ name: 'home' });
         console.log(authDetails);
       } catch (error) {

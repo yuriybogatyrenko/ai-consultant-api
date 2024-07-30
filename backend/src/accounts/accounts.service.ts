@@ -103,4 +103,18 @@ export class AccountsService {
 
     return account;
   }
+
+  async saveGptApiKey(userId: string, accountId: string, apiKey: string) {
+    const account = await this.accountsRepository.findOneBy({
+      account_id: accountId,
+      owner: { id: userId },
+    });
+
+    if (!account) {
+      throw new NotFoundException('Account not found');
+    }
+
+    account.gpt_api_key = apiKey;
+    return this.accountsRepository.save(account);
+  }
 }

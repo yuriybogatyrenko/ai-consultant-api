@@ -1,11 +1,16 @@
 <template>
   <v-col cols="12">
     <h3>Подключения</h3>
+
+    <v-btn :to="{ name: 'gpt-settings', params: { id: $route.params.id } }"
+      >GTP SETTINGS</v-btn
+    >
     <v-expansion-panels>
       <v-expansion-panel>
         <v-expansion-panel-header>GPT</v-expansion-panel-header>
         <v-expansion-panel-content>
           <v-text-field
+            type="password"
             v-model="accountSettings.gpt_api_key"
             label="API Key"
             required
@@ -17,30 +22,32 @@
       <v-expansion-panel>
         <v-expansion-panel-header>Telegram</v-expansion-panel-header>
         <v-expansion-panel-content>
-          <v-list>
-            <v-list-item v-if="account.telegram_settings">
-              <v-list-item-content>
-                <v-list-item-title>{{
-                  account.telegram_settings.bot_username
-                }}</v-list-item-title>
-              </v-list-item-content>
-            </v-list-item>
-          </v-list>
+          <template v-if="account.telegram_settings">
+            <v-list>
+              <v-list-item>
+                <v-list-item-content>
+                  <v-list-item-title>{{
+                    account.telegram_settings.bot_username
+                  }}</v-list-item-title>
+                </v-list-item-content>
+              </v-list-item>
+            </v-list>
+
+            <v-switch
+              v-model="accountSettings.telegram.is_active"
+              color="success"
+              label="Is Active"
+              @change="toggleTelegram($event)"
+            ></v-switch>
+            <v-btn @click.prevent="showTelegramForm = true">Add settings</v-btn>
+          </template>
+
+          <TelegramSettingsForm
+            @save="saveTelegramSettings"
+            :telegram-settings="account.telegram_settings"
+            v-if="showTelegramForm"
+          ></TelegramSettingsForm>
         </v-expansion-panel-content>
-
-        <v-switch
-          v-model="accountSettings.telegram.is_active"
-          color="success"
-          label="Is Active"
-          @change="toggleTelegram($event)"
-        ></v-switch>
-        <v-btn @click.prevent="showTelegramForm = true">Add settings</v-btn>
-
-        <TelegramSettingsForm
-          @save="saveTelegramSettings"
-          :telegram-settings="account.telegram_settings"
-          v-if="showTelegramForm"
-        ></TelegramSettingsForm>
       </v-expansion-panel>
 
       <v-expansion-panel>
@@ -99,10 +106,10 @@ export default {
   },
   methods: {
     async getAccount() {
-      const id = this.$route.params.id;
+      const id = this.$route.params.account_id;
       this.account = await api.get(`/accounts/${id}`).then((response) => {
         this.accountSettings.telegram.is_active =
-          response.telegram_settings.is_active;
+          response.telegram_settings?.is_active;
         this.accountSettings.gpt_api_key = response.gpt_api_key;
         return response;
       });
@@ -127,7 +134,7 @@ export default {
     },
     saveGptKey() {
       api.post(`/accounts/${this.$route.params.id}/gpt-api-key`, {
-        gpt_api_key: this.accountSettings.gpt_api_key,
+        gptApiKey: this.accountSettings.gpt_api_key,
       });
     },
   },

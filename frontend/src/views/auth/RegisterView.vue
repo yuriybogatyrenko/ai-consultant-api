@@ -37,7 +37,7 @@ export default {
       } catch (error) {
         // Обработка ошибки регистрации
         this.errorMessage =
-          error.response?.data?.message ||
+          error.response?.message ||
           'Произошла ошибка при регистрации. Пожалуйста, попробуйте снова.';
         console.log(error);
       }

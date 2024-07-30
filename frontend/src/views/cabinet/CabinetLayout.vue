@@ -58,11 +58,6 @@ export default {
           icon: 'mdi-package-variant',
           route: { name: 'cabinet-accounts' },
         },
-        {
-          title: 'Активности',
-          icon: 'mdi-chart-line',
-          route: { name: 'home' },
-        },
       ],
     };
   },

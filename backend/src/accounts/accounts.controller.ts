@@ -63,4 +63,39 @@ export class AccountsController {
       settings,
     );
   }
+
+  @Post(':accountId/whatsapp-settings')
+  async saveWhatsAppSettings(
+    @GetUser('userId') userId: string,
+    @Param('accountId') accountId: string,
+    @Body() settings: any,
+  ): Promise<Account> {
+    return this.accountsService.saveTelegramSettings(
+      userId,
+      accountId,
+      settings,
+    );
+  }
+
+  @Post(':accountId/instagram-settings')
+  async saveInstagramSettings(
+    @GetUser('userId') userId: string,
+    @Param('accountId') accountId: string,
+    @Body() settings: any,
+  ): Promise<Account> {
+    return this.accountsService.saveTelegramSettings(
+      userId,
+      accountId,
+      settings,
+    );
+  }
+
+  @Post(':accountId/gpt-api-key')
+  async saveGptApiKey(
+    @GetUser('userId') userId: string,
+    @Param('accountId') accountId: string,
+    @Body('gptApiKey') gptApiKey: string,
+  ): Promise<Account> {
+    return this.accountsService.saveGptApiKey(userId, accountId, gptApiKey);
+  }
 }

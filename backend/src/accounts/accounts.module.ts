@@ -26,5 +26,6 @@ import { PlatformWhatsAppSetting } from 'src/platform-whatsapp/entity/platform-w
   ],
   controllers: [AccountsController],
   providers: [AccountsService],
+  exports: [AccountsService],
 })
 export class AccountsModule {}
