@@ -1,9 +1,16 @@
-import { ForbiddenException, Injectable } from '@nestjs/common';
+import {
+  ForbiddenException,
+  forwardRef,
+  Inject,
+  Injectable,
+} from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import * as TelegramBot from 'node-telegram-bot-api';
 import { Repository } from 'typeorm';
 import { PlatformTelegramSetting } from './entity/platform-telegram.entity';
 import { CreateTelegramSettingsDto } from './dto/create-telegram-settings.dto';
+import { ContactsService } from 'src/contacts/contacts.service';
+import { GptApiService } from 'src/gpt-api/gpt-api.service';
 
 @Injectable()
 export class PlatformTelegramService {
@@ -12,6 +19,9 @@ export class PlatformTelegramService {
   constructor(
     @InjectRepository(PlatformTelegramSetting)
     private readonly telegramSettingsRepository: Repository<PlatformTelegramSetting>,
+    private readonly contactService: ContactsService,
+    @Inject(forwardRef(() => GptApiService))
+    private readonly gptApiService: GptApiService,
   ) {}
 
   async onModuleInit() {
@@ -41,7 +51,6 @@ export class PlatformTelegramService {
         'You are not authorized to perform this action',
       );
     }
-    // if() {}
 
     if (body.isActive) {
       this.initializeBot(bot);
@@ -78,8 +87,14 @@ export class PlatformTelegramService {
     const chatId = msg.chat.id;
     const text = msg.text;
 
-    // Log message or perform other actions
-    console.log(`Received message from ${chatId}: ${text}`);
+    const botDb = await this.telegramSettingsRepository.findOne({
+      where: { id: botId },
+      relations: { account: true },
+    });
+
+    await this.contactService.createMessageFromTelegram(msg, botDb.account);
+
+    this.gptApiService.sendMessageToGpt(botDb, text);
 
     const bot = this.bots.get(botId);
     if (bot) {

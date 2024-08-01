@@ -24,6 +24,9 @@ export class PlatformTelegramSetting {
   @Column()
   bot_username: string;
 
+  @Column({ nullable: true })
+  gpt_assistant_id: string;
+
   @Column({ type: 'boolean', default: false })
   is_active: boolean;
 

@@ -17,12 +17,10 @@
             :to="item.route"
             link
           >
-            <v-list-item-icon>
+            <template v-slot:prepend>
               <v-icon>{{ item.icon }}</v-icon>
-            </v-list-item-icon>
-            <v-list-item-content>
-              <v-list-item-title>{{ item.title }}</v-list-item-title>
-            </v-list-item-content>
+            </template>
+            <v-list-item-title>{{ item.title }}</v-list-item-title>
           </v-list-item>
         </v-list>
       </v-navigation-drawer>

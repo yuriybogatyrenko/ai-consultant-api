@@ -116,7 +116,7 @@ export default {
     },
     async saveTelegramSettings(data) {
       this.account = await api.post(
-        `/accounts/${this.$route.params.id}/telegram-settings`,
+        `/accounts/${this.$route.params.account_id}/telegram-settings`,
         data,
       );
       this.showTelegramForm = false;
@@ -133,7 +133,7 @@ export default {
       }
     },
     saveGptKey() {
-      api.post(`/accounts/${this.$route.params.id}/gpt-api-key`, {
+      api.post(`/accounts/${this.$route.params.account_id}/gpt-api-key`, {
         gptApiKey: this.accountSettings.gpt_api_key,
       });
     },

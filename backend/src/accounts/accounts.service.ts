@@ -1,4 +1,9 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import {
+  forwardRef,
+  Inject,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { Account } from './entity/account.entity';
@@ -22,6 +27,7 @@ export class AccountsService {
     @InjectRepository(PlatformInstagramSetting)
     private instagramSettingsRepository: Repository<PlatformInstagramSetting>,
     private usersService: UsersService,
+    @Inject(forwardRef(() => PlatformTelegramService))
     private telegramSettingsService: PlatformTelegramService,
   ) {}
 

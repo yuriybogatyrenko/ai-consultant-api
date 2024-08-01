@@ -1,25 +1,87 @@
-import { Injectable, UnauthorizedException } from '@nestjs/common';
+import {
+  forwardRef,
+  Inject,
+  Injectable,
+  UnauthorizedException,
+} from '@nestjs/common';
 import OpenAI from 'openai';
+import {
+  Assistant,
+  AssistantCreateParams,
+} from 'openai/resources/beta/assistants';
 import { AccountsService } from 'src/accounts/accounts.service';
-import { UsersService } from 'src/users/users.service';
+import { Account } from 'src/accounts/entity/account.entity';
 
 @Injectable()
 export class GptApiService {
-  constructor(private accountsService: AccountsService) {}
+  private openAiClients = new Map<string, OpenAI>();
+
+  constructor(
+    @Inject(forwardRef(() => AccountsService))
+    private accountsService: AccountsService,
+  ) {}
   async getAssistants(userId: string, accountId: string) {
-    console.log('userId', userId);
+    // console.log('userId', userId);
     const account = await this.accountsService.findOne(accountId);
-    console.log('account', account);
+    // console.log('account', account);
 
     if (account.owner.id !== userId) {
       throw new UnauthorizedException('Unauthorized');
     }
-    const openai = new OpenAI({ apiKey: account.gpt_api_key });
 
-    return account;
+    if (!account.gpt_api_key) {
+      throw new UnauthorizedException('GPT API key not set');
+    }
+
+    const openai = this.getOrCreateOpenAiClient(account);
+    return (await openai.beta.assistants.list()).data;
   }
 
-  createAssistant() {}
+  private getOrCreateOpenAiClient(account: Account): OpenAI {
+    if (!account.gpt_api_key) {
+      throw new UnauthorizedException('GPT API key not set');
+    }
 
-  updateAssistant() {}
+    if (!this.openAiClients.has(account.account_id)) {
+      const openai = new OpenAI({ apiKey: account.gpt_api_key });
+      this.openAiClients.set(account.account_id, openai);
+    }
+    return this.openAiClients.get(account.account_id);
+  }
+
+  async createAssistant(
+    userId: string,
+    accountId: string,
+    assistant: AssistantCreateParams,
+  ) {
+    const account = await this.accountsService.findOne(accountId);
+    if (account.owner.id !== userId) {
+      throw new UnauthorizedException('Unauthorized');
+    }
+
+    const openai = this.getOrCreateOpenAiClient(account);
+    return await openai.beta.assistants.create(assistant);
+  }
+
+  async updateAssistant(
+    userId: string,
+    accountId: string,
+    assistant: Assistant,
+  ) {
+    const account = await this.accountsService.findOne(accountId);
+    if (account.owner.id !== userId) {
+      throw new UnauthorizedException('Unauthorized');
+    }
+    const openai = this.getOrCreateOpenAiClient(account);
+    assistant.description ??= '';
+    const assistantId = assistant.id;
+    delete assistant.id;
+    delete assistant.object;
+    delete assistant.created_at;
+    return await openai.beta.assistants.update(assistantId, assistant);
+  }
+
+  async sendMessageToGpt(...args: any[]) {
+    console.log('sendMessageToGpt', args);
+  }
 }

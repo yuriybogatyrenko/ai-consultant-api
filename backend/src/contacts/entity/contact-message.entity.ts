@@ -5,9 +5,11 @@ import {
   Column,
   CreateDateColumn,
   UpdateDateColumn,
+  JoinColumn,
 } from 'typeorm';
 import { Contact } from './contact.entity';
 import { ContactThread } from './contact-thread.entity';
+import { PlatformsEnum } from 'src/enums/platforms.enum';
 
 @Entity()
 export class ContactMessage {
@@ -15,16 +17,21 @@ export class ContactMessage {
   message_id: string;
 
   @ManyToOne(() => ContactThread, (thread) => thread.messages)
+  @JoinColumn()
   thread: ContactThread;
 
   @ManyToOne(() => Contact, (contact) => contact.messages)
+  @JoinColumn()
   contact: Contact;
 
   @Column({ type: 'text' })
   content: string;
 
+  @Column({ nullable: true })
+  platoform_message_id: string;
+
   @Column()
-  platform: string;
+  platform: PlatformsEnum;
 
   @CreateDateColumn()
   created_at: Date;

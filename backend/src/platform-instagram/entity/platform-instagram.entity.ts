@@ -33,6 +33,9 @@ export class PlatformInstagramSetting {
   @Column()
   expires_in: number;
 
+  @Column({ nullable: true })
+  gpt_assistant_id: string;
+
   @Column({ type: 'boolean', default: false })
   is_active: boolean;
 

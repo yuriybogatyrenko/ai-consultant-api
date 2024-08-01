@@ -11,6 +11,7 @@ import {
 } from 'typeorm';
 import * as bcrypt from 'bcrypt';
 import { Account } from 'src/accounts/entity/account.entity';
+import { ContactThread } from 'src/contacts/entity/contact-thread.entity';
 
 @Entity()
 export class UserEntity {
@@ -34,6 +35,9 @@ export class UserEntity {
   @ManyToMany(() => Role, (role) => role.users)
   @JoinTable()
   roles: Role[];
+
+  @OneToMany(() => ContactThread, (thread) => thread.user)
+  threads: ContactThread[];
 
   @Column({ type: 'enum', enum: ['admin', 'user'], default: 'user' })
   user_type: string;

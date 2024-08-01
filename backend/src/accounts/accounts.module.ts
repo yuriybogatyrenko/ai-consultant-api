@@ -1,4 +1,4 @@
-import { Module } from '@nestjs/common';
+import { forwardRef, Module } from '@nestjs/common';
 import { AccountsController } from './accounts.controller';
 import { AccountsService } from './accounts.service';
 import { TypeOrmModule } from '@nestjs/typeorm';
@@ -20,7 +20,7 @@ import { PlatformWhatsAppSetting } from 'src/platform-whatsapp/entity/platform-w
       PlatformWhatsAppSetting,
     ]),
     PlatformInstagramModule,
-    PlatformTelegramModule,
+    forwardRef(() => PlatformTelegramModule),
     PlatformWhatsappModule,
     UsersModule,
   ],
