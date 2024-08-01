@@ -4,6 +4,8 @@ import {
   Injectable,
   UnauthorizedException,
 } from '@nestjs/common';
+import { InjectRepository } from '@nestjs/typeorm';
+import TelegramBot from 'node-telegram-bot-api';
 import OpenAI from 'openai';
 import {
   Assistant,
@@ -11,6 +13,12 @@ import {
 } from 'openai/resources/beta/assistants';
 import { AccountsService } from 'src/accounts/accounts.service';
 import { Account } from 'src/accounts/entity/account.entity';
+import { ContactsService } from 'src/contacts/contacts.service';
+import { ContactMessage } from 'src/contacts/entity/contact-message.entity';
+import { ContactThread } from 'src/contacts/entity/contact-thread.entity';
+import { Contact } from 'src/contacts/entity/contact.entity';
+import { PlatformTelegramSetting } from 'src/platform-telegram/entity/platform-telegram.entity';
+import { Repository } from 'typeorm';
 
 @Injectable()
 export class GptApiService {
@@ -19,6 +27,9 @@ export class GptApiService {
   constructor(
     @Inject(forwardRef(() => AccountsService))
     private accountsService: AccountsService,
+    private readonly contactService: ContactsService,
+    @InjectRepository(ContactThread)
+    private readonly threadRepository: Repository<ContactThread>,
   ) {}
   async getAssistants(userId: string, accountId: string) {
     // console.log('userId', userId);
@@ -81,7 +92,19 @@ export class GptApiService {
     return await openai.beta.assistants.update(assistantId, assistant);
   }
 
-  async sendMessageToGpt(...args: any[]) {
-    console.log('sendMessageToGpt', args);
+  async sendMessageToGpt(
+    bot: PlatformTelegramSetting,
+    message: ContactMessage,
+    thread: ContactThread,
+    contact: Contact,
+  ) {
+    // console.log('sendMessageToGpt', args);
+    const openai = this.getOrCreateOpenAiClient(bot.account);
+    // const threadId = bot.thread_id;
+    if (!thread.gpt_thread_id) {
+      const openAiThread = await openai.beta.threads.create();
+      thread.gpt_thread_id = openAiThread.id;
+      await this.threadRepository.save(thread);
+    }
   }
 }

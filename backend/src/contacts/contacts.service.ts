@@ -75,7 +75,7 @@ export class ContactsService {
       thread = await this.threadRepository.save(thread);
     }
 
-    const dbMessage = this.messageRepository.create({
+    let dbMessage = this.messageRepository.create({
       platoform_message_id: message.message_id.toString(),
       content: message.text,
       platform: PlatformsEnum.TELEGRAM,
@@ -83,6 +83,8 @@ export class ContactsService {
       contact: contact,
     });
 
-    return this.messageRepository.save(dbMessage);
+    dbMessage = await this.messageRepository.save(dbMessage);
+
+    return { message: dbMessage, thread, contact };
   }
 }

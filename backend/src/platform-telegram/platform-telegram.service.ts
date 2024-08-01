@@ -92,9 +92,10 @@ export class PlatformTelegramService {
       relations: { account: true },
     });
 
-    await this.contactService.createMessageFromTelegram(msg, botDb.account);
+    const { message, thread, contact } =
+      await this.contactService.createMessageFromTelegram(msg, botDb.account);
 
-    this.gptApiService.sendMessageToGpt(botDb, text);
+    this.gptApiService.sendMessageToGpt(botDb, message, thread, contact);
 
     const bot = this.bots.get(botId);
     if (bot) {
