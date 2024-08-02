@@ -6,11 +6,15 @@ import {
   ManyToOne,
   OneToOne,
   JoinColumn,
+  CreateDateColumn,
+  UpdateDateColumn,
 } from 'typeorm';
 import { ContactMessage } from './contact-message.entity';
 import { ContactThread } from './contact-thread.entity';
 import { Account } from 'src/accounts/entity/account.entity';
 import { PlatformsEnum } from 'src/enums/platforms.enum';
+import { ContactCustomField } from 'src/contact-custom-fields/entity/contact-custom-field.entity';
+import { ContactCustomFieldValue } from 'src/contact-custom-fields/entity/contact-custom-field-value.entity';
 
 @Entity()
 export class Contact {
@@ -47,4 +51,16 @@ export class Contact {
   @ManyToOne(() => Account, (account) => account.contacts)
   @JoinColumn()
   account: Account;
+
+  @OneToMany(
+    () => ContactCustomFieldValue,
+    (customFieldValue) => customFieldValue.contact,
+  )
+  custom_fields_values: ContactCustomFieldValue[];
+
+  @CreateDateColumn()
+  created_at: Date;
+
+  @UpdateDateColumn()
+  updated_at: Date;
 }

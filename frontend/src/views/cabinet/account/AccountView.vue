@@ -39,8 +39,8 @@
               label="Is Active"
               @change="toggleTelegram($event)"
             ></v-switch>
-            <v-btn @click.prevent="showTelegramForm = true">Add settings</v-btn>
           </template>
+          <v-btn @click.prevent="showTelegramForm = true">Add settings</v-btn>
 
           <TelegramSettingsForm
             @save="saveTelegramSettings"

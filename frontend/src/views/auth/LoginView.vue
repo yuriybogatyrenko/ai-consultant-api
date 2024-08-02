@@ -33,6 +33,10 @@
         </v-col>
       </v-row>
     </v-form>
+
+    <div class="pt-5">
+      <v-btn :to="{ name: 'register' }">Registration</v-btn>
+    </div>
   </v-container>
 </template>
 

@@ -7,12 +7,14 @@ import { ContactThread } from 'src/contacts/entity/contact-thread.entity';
 import { Contact } from 'src/contacts/entity/contact.entity';
 import { ContactMessage } from 'src/contacts/entity/contact-message.entity';
 import { ContactsModule } from 'src/contacts/contacts.module';
+import { HttpModule } from '@nestjs/axios';
 
 @Module({
   imports: [
     forwardRef(() => AccountsModule),
     TypeOrmModule.forFeature([ContactThread, ContactMessage, Contact]),
     ContactsModule,
+    HttpModule,
   ],
   controllers: [GptApiController],
   providers: [GptApiService],

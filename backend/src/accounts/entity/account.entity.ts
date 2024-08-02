@@ -1,7 +1,9 @@
+import { AccountCustomField } from 'src/account-custom-fields/entity/account-custom-field.entity';
 import { AccountTeamMember } from 'src/account-team/entity/account-team-member.entity';
 import { ApiKeyEntity } from 'src/api-keys/api-keys.entity';
 import { Payment } from 'src/billing/entity/billing-payment.entity';
 import { Subscription } from 'src/billing/entity/billing-subscription.entity';
+import { ContactCustomField } from 'src/contact-custom-fields/entity/contact-custom-field.entity';
 import { Contact } from 'src/contacts/entity/contact.entity';
 import { PlatformInstagramSetting } from 'src/platform-instagram/entity/platform-instagram.entity';
 import { PlatformTelegramSetting } from 'src/platform-telegram/entity/platform-telegram.entity';
@@ -29,6 +31,9 @@ export class Account {
 
   @Column({ nullable: true })
   description: string;
+
+  @Column({ nullable: true })
+  gpt_assistant_id: string;
 
   @ManyToOne(() => UserEntity, (user) => user.accounts, { eager: true })
   @JoinColumn()
@@ -68,6 +73,12 @@ export class Account {
 
   @OneToMany(() => Contact, (contact) => contact.account)
   contacts: Contact[];
+
+  @OneToMany(() => AccountCustomField, (field) => field.account)
+  custom_fields: AccountCustomField[];
+
+  @OneToMany(() => ContactCustomField, (contactField) => contactField.account)
+  contact_custom_fields: ContactCustomField[];
 
   @Column({ nullable: true })
   gpt_api_key: string;

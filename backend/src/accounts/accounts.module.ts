@@ -10,6 +10,7 @@ import { UsersModule } from 'src/users/users.module';
 import { PlatformInstagramSetting } from 'src/platform-instagram/entity/platform-instagram.entity';
 import { PlatformTelegramSetting } from 'src/platform-telegram/entity/platform-telegram.entity';
 import { PlatformWhatsAppSetting } from 'src/platform-whatsapp/entity/platform-whatsapp.entity';
+import { AccountCustomField } from 'src/account-custom-fields/entity/account-custom-field.entity';
 
 @Module({
   imports: [
@@ -18,6 +19,7 @@ import { PlatformWhatsAppSetting } from 'src/platform-whatsapp/entity/platform-w
       PlatformInstagramSetting,
       PlatformTelegramSetting,
       PlatformWhatsAppSetting,
+      AccountCustomField,
     ]),
     PlatformInstagramModule,
     forwardRef(() => PlatformTelegramModule),

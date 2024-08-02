@@ -1,4 +1,6 @@
+import { HttpService } from '@nestjs/axios';
 import {
+  BadRequestException,
   forwardRef,
   Inject,
   Injectable,
@@ -30,6 +32,7 @@ export class GptApiService {
     private readonly contactService: ContactsService,
     @InjectRepository(ContactThread)
     private readonly threadRepository: Repository<ContactThread>,
+    private readonly httpService: HttpService,
   ) {}
   async getAssistants(userId: string, accountId: string) {
     // console.log('userId', userId);
@@ -106,5 +109,98 @@ export class GptApiService {
       thread.gpt_thread_id = openAiThread.id;
       await this.threadRepository.save(thread);
     }
+
+    await openai.beta.threads.messages.create(thread.gpt_thread_id, {
+      role: 'user',
+      content: message.content,
+    });
+
+    const gptRun = await openai.beta.threads.runs.create(thread.gpt_thread_id, {
+      assistant_id: bot.account.gpt_assistant_id,
+    });
+
+    let i = 0;
+    while (i < 20) {
+      const runResult = await openai.beta.threads.runs.retrieve(
+        thread.gpt_thread_id,
+        gptRun.id,
+      );
+
+      if (runResult.status === 'expired') {
+        throw new BadRequestException('GPT run expired');
+      }
+
+      if (runResult.status === 'completed') {
+        const message = await openai.beta.threads.messages.list(
+          thread.gpt_thread_id,
+        );
+        console.log('message', message);
+        return message;
+      }
+
+      if (runResult.status === 'requires_action') {
+        console.log('Actions in progress...');
+        // const output = [];
+        const output = await Promise.all(
+          runResult.required_action.submit_tool_outputs.tool_calls.map(
+            async (tool_call) => {
+              if (tool_call.function?.name) {
+                console.log('action name: ', tool_call);
+                try {
+                  const response = await this.httpService
+                    .post('body.webhookUrl', {
+                      //   ...body,
+                      functionObject: tool_call.function,
+                    })
+                    .toPromise();
+
+                  // console.log(responsea);
+                  if (response) {
+                    console.log('######### response from backend #########');
+                    console.log(response);
+                    return {
+                      tool_call_id: tool_call.id,
+                      output: response ? JSON.stringify(response) : '',
+                    };
+                  } else {
+                    return {
+                      tool_call_id: tool_call.id,
+                      output: `Can't procceed data`,
+                    };
+                  }
+                } catch (err) {
+                  console.error(err);
+                  return {
+                    tool_call_id: tool_call.id,
+                    output: err.message,
+                  };
+                }
+              }
+              return {};
+            },
+          ),
+        );
+
+        this.submitToolOuputs(bot, thread.gpt_thread_id, runResult.id, output);
+        console.log('Actions done');
+      }
+
+      await sleep(2000);
+      i++;
+    }
+
+    console.log('bot', bot.account);
+  }
+
+  submitToolOuputs(
+    bot: PlatformTelegramSetting,
+    threadId: string,
+    runId: string,
+    toolOutputs: any,
+  ) {
+    const openai = this.getOrCreateOpenAiClient(bot.account);
+    return openai.beta.threads.runs.submitToolOutputs(threadId, runId, {
+      tool_outputs: toolOutputs,
+    });
   }
 }

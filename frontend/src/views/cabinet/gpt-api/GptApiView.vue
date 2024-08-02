@@ -4,6 +4,7 @@
       v-if="assistants"
       :assistants="assistants"
       @saveAssistant="saveAssistant"
+      @setAssistentForAccount="setAssistentForAccount"
     />
   </div>
 </template>
@@ -25,6 +26,14 @@ export default {
     this.getGptAssistants();
   },
   methods: {
+    async setAssistentForAccount(assistant) {
+      await api.post(
+        `/accounts/${this.$route.params.account_id}/set-assistant`,
+        {
+          assistantId: assistant.id,
+        },
+      );
+    },
     async getGptAssistants() {
       this.assistants = await api.get('/gpt-api', {
         params: { accountId: this.$route.params.account_id },

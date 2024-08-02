@@ -80,6 +80,23 @@ export class AccountsService {
     await this.accountsRepository.remove(account);
   }
 
+  async setAssistant(userId: string, accountId: string, assistantId: string) {
+    const account = await this.accountsRepository.findOneBy({
+      account_id: accountId,
+      owner: { id: userId },
+    });
+
+    if (!account) {
+      throw new NotFoundException('Account not found');
+    }
+
+    account.gpt_assistant_id = assistantId;
+
+    await this.accountsRepository.save(account);
+
+    return account;
+  }
+
   async saveTelegramSettings(
     userId: string,
     accountId: string,

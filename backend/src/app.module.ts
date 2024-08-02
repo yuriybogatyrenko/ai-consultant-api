@@ -23,6 +23,8 @@ import { PlatformTelegramModule } from './platform-telegram/platform-telegram.mo
 import { PlatformWhatsappModule } from './platform-whatsapp/platform-whatsapp.module';
 import { PlatformInstagramModule } from './platform-instagram/platform-instagram.module';
 import { GptApiModule } from './gpt-api/gpt-api.module';
+import { AccountCustomFieldsModule } from './account-custom-fields/account-custom-fields.module';
+import { ContactCustomFieldsModule } from './contact-custom-fields/contact-custom-fields.module';
 
 @Module({
   imports: [
@@ -57,6 +59,8 @@ import { GptApiModule } from './gpt-api/gpt-api.module';
     PlatformWhatsappModule,
     PlatformInstagramModule,
     GptApiModule,
+    AccountCustomFieldsModule,
+    ContactCustomFieldsModule,
   ],
   controllers: [AppController],
   providers: [

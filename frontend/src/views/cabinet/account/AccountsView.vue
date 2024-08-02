@@ -71,7 +71,7 @@ export default {
     async createAccount() {
       try {
         const response = await api.post('/accounts', this.account);
-        this.accounts = response;
+        this.accounts.push(response);
       } catch (error) {
         console.error('Ошибка при создании аккаунта:', error);
       }

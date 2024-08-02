@@ -12,6 +12,10 @@
       </div>
       <button type="submit" class="register-button">Register</button>
     </form>
+
+    <div class="pt-5">
+      <v-btn :to="{ name: 'login' }">Login</v-btn>
+    </div>
   </div>
 </template>
 

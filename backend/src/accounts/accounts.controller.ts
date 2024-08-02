@@ -51,6 +51,15 @@ export class AccountsController {
     return this.accountsService.remove(id);
   }
 
+  @Post(':accountId/set-assistant')
+  async setAssistant(
+    @GetUser('userId') userId: string,
+    @Param('accountId') accountId: string,
+    @Body('assistantId') assistantId: string,
+  ): Promise<Account> {
+    return this.accountsService.setAssistant(userId, accountId, assistantId);
+  }
+
   @Post(':accountId/telegram-settings')
   async saveTelegramSettings(
     @GetUser('userId') userId: string,

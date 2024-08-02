@@ -53,6 +53,14 @@ const routes = [
           ),
       },
       {
+        path: 'accounts/:account_id/custom-fields',
+        name: 'custom-fields',
+        component: () =>
+          import(
+            /* webpackChunkName: "custom-fields" */ '../views/cabinet/custom-fields/CustomFieldsView.vue'
+          ),
+      },
+      {
         path: 'api-keys',
         name: 'cabinet-api-keys',
         component: () =>

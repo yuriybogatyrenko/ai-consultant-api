@@ -14,6 +14,13 @@
       >
         <v-card>
           <v-card-title>{{ assistant.name }}</v-card-title>
+          <v-card-title
+            ><v-btn
+              @click.prevent="setAssistentForAccount(assistant)"
+              color="warning"
+              >Назначить ассистента</v-btn
+            ></v-card-title
+          >
           <v-card-subtitle>{{ assistant.model }}</v-card-subtitle>
           <v-card-text>
             <p>
@@ -92,7 +99,10 @@ export default {
     };
   },
   methods: {
-    openFunctionDialog() {},
+    setAssistentForAccount(assistant) {
+      console.log('set assistant for account');
+      this.$emit('setAssistentForAccount', assistant);
+    },
     openCreateDialog() {
       this.editingAssistant = null;
       this.dialog = true;
