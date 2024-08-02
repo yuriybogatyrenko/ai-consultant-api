@@ -51,6 +51,7 @@ export class ContactsService {
     });
 
     if (!contact) {
+      console.log('no contacts found, will create');
       contact = await this.createContact(
         {
           platform: PlatformsEnum.TELEGRAM,
@@ -63,17 +64,22 @@ export class ContactsService {
       );
     }
 
+    console.log('contact', contact);
+
     let thread = await this.threadRepository.findOneBy({
-      contact: contact,
+      contact: { contact_id: contact.contact_id },
     });
 
     if (!thread) {
+      console.log('thread not found');
       thread = this.threadRepository.create({
         contact: contact,
       });
 
       thread = await this.threadRepository.save(thread);
     }
+
+    console.log('thread', thread);
 
     let dbMessage = this.messageRepository.create({
       platoform_message_id: message.message_id.toString(),

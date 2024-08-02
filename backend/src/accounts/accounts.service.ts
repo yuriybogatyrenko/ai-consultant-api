@@ -140,4 +140,11 @@ export class AccountsService {
     account.gpt_api_key = apiKey;
     return this.accountsRepository.save(account);
   }
+
+  async getAccountCustomFields(account: Account) {
+    return this.accountsRepository.findOne({
+      where: { account_id: account.account_id },
+      relations: { custom_fields: true, contact_custom_fields: true },
+    });
+  }
 }

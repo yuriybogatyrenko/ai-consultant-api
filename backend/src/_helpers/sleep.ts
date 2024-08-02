@@ -1,3 +1,3 @@
-async function sleep(timeout = 1000) {
+export default function sleep(timeout = 1000) {
   return new Promise((resolve) => setTimeout(resolve, timeout));
 }

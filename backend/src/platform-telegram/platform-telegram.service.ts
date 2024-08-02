@@ -95,11 +95,17 @@ export class PlatformTelegramService {
     const { message, thread, contact } =
       await this.contactService.createMessageFromTelegram(msg, botDb.account);
 
-    this.gptApiService.sendMessageToGpt(botDb, message, thread, contact);
+    const gptResponse: any = await this.gptApiService.sendMessageToGpt(
+      botDb,
+      message,
+      thread,
+      contact,
+    );
 
+    console.log('GPT response:', gptResponse);
     const bot = this.bots.get(botId);
     if (bot) {
-      bot.sendMessage(chatId, `You said: ${text}`);
+      bot.sendMessage(chatId, gptResponse);
     }
   }
 
