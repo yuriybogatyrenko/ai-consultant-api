@@ -142,9 +142,16 @@ export class AccountsService {
   }
 
   async getAccountCustomFields(account: Account) {
-    return this.accountsRepository.findOne({
+    const accountDb = await this.accountsRepository.findOne({
       where: { account_id: account.account_id },
       relations: { custom_fields: true, contact_custom_fields: true },
     });
+    const fields = {};
+
+    accountDb.custom_fields?.forEach((field) => {
+      fields[field.field_name] = field.field_value;
+    });
+
+    return fields;
   }
 }

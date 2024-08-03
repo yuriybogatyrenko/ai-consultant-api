@@ -22,6 +22,7 @@ import { ContactThread } from 'src/contacts/entity/contact-thread.entity';
 import { Contact } from 'src/contacts/entity/contact.entity';
 import { PlatformTelegramSetting } from 'src/platform-telegram/entity/platform-telegram.entity';
 import { Repository } from 'typeorm';
+import { firstValueFrom } from 'rxjs';
 
 @Injectable()
 export class GptApiService {
@@ -124,8 +125,10 @@ export class GptApiService {
         },
       );
 
-      const accountWithCustomFields =
+      const accountWithCustomFields: any =
         await this.accountsService.getAccountCustomFields(bot.account);
+
+      console.log(accountWithCustomFields);
 
       let i = 0;
       while (i < 20) {
@@ -153,36 +156,41 @@ export class GptApiService {
           const output = await Promise.all(
             runResult.required_action.submit_tool_outputs.tool_calls.map(
               async (tool_call) => {
-                if (
-                  tool_call.function?.name &&
-                  accountWithCustomFields.custom_fields['webhookUrl']
-                ) {
+                if (tool_call.function?.name) {
                   console.log('action name: ', tool_call);
+                  console.log(accountWithCustomFields.webhookUrl);
+                  if (!accountWithCustomFields.webhookUrl) {
+                    console.log('no webhook url');
+                  }
                   try {
-                    const response = await this.httpService
-                      .post(
-                        accountWithCustomFields.custom_fields['webhookUrl'],
-                        {
-                          //   ...body,
-                          functionObject: tool_call.function,
-                        },
-                      )
-                      .toPromise();
+                    if (accountWithCustomFields.webhookUrl) {
+                      const response = await firstValueFrom(
+                        this.httpService.post(
+                          accountWithCustomFields.webhookUrl,
+                          {
+                            //   ...body,
+                            functionObject: tool_call.function,
+                          },
+                        ),
+                      );
 
-                    // console.log(responsea);
-                    if (response) {
-                      console.log('######### response from backend #########');
                       console.log(response);
-                      return {
-                        tool_call_id: tool_call.id,
-                        output: response ? JSON.stringify(response) : '',
-                      };
-                    } else {
-                      return {
-                        tool_call_id: tool_call.id,
-                        output: `Can't procceed data`,
-                      };
+                      if (response && response.data) {
+                        console.log(
+                          '######### response from backend #########',
+                        );
+                        console.log(response);
+                        return {
+                          tool_call_id: tool_call.id,
+                          output: response ? JSON.stringify(response.data) : '',
+                        };
+                      }
                     }
+
+                    return {
+                      tool_call_id: tool_call.id,
+                      output: `Can't procceed data`,
+                    };
                   } catch (err) {
                     console.error(err);
                     return {
@@ -195,6 +203,8 @@ export class GptApiService {
               },
             ),
           );
+
+          console.log(output);
 
           this.submitToolOuputs(
             bot,
@@ -233,9 +243,13 @@ export class GptApiService {
     runId: string,
     toolOutputs: any,
   ) {
-    const openai = this.getOrCreateOpenAiClient(bot.account);
-    return openai.beta.threads.runs.submitToolOutputs(threadId, runId, {
-      tool_outputs: toolOutputs,
-    });
+    try {
+      const openai = this.getOrCreateOpenAiClient(bot.account);
+      return openai.beta.threads.runs.submitToolOutputs(threadId, runId, {
+        tool_outputs: toolOutputs,
+      });
+    } catch (err) {
+      console.log('submit tool outputs error', err);
+    }
   }
 }
