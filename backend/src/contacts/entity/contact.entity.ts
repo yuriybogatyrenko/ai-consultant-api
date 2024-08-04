@@ -4,7 +4,6 @@ import {
   Column,
   OneToMany,
   ManyToOne,
-  OneToOne,
   JoinColumn,
   CreateDateColumn,
   UpdateDateColumn,
@@ -13,7 +12,6 @@ import { ContactMessage } from './contact-message.entity';
 import { ContactThread } from './contact-thread.entity';
 import { Account } from 'src/accounts/entity/account.entity';
 import { PlatformsEnum } from 'src/enums/platforms.enum';
-import { ContactCustomField } from 'src/contact-custom-fields/entity/contact-custom-field.entity';
 import { ContactCustomFieldValue } from 'src/contact-custom-fields/entity/contact-custom-field-value.entity';
 
 @Entity()
@@ -27,7 +25,7 @@ export class Contact {
   @Column()
   platform: PlatformsEnum;
 
-  @Column({ nullable: true, unique: true })
+  @Column({ nullable: true })
   platform_user_id: string;
 
   @Column({ nullable: true })
