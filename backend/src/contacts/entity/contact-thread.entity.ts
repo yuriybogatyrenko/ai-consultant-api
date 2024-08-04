@@ -28,7 +28,7 @@ export class ContactThread {
   @Column({ nullable: true })
   gpt_thread_id: string;
 
-  @OneToOne(() => Contact, (contact) => contact.thread)
+  @ManyToOne(() => Contact, (contact) => contact.thread)
   @JoinColumn()
   contact: Contact;
 

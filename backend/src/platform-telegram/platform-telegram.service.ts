@@ -41,23 +41,29 @@ export class PlatformTelegramService {
     userId: string,
     body: Partial<CreateTelegramSettingsDto>,
   ) {
-    const bot = await this.telegramSettingsRepository.findOne({
-      where: { id: body.id },
-      relations: { account: true },
-    });
+    try {
+      const bot = await this.telegramSettingsRepository.findOne({
+        where: { id: body.id },
+        relations: { account: true },
+      });
 
-    if (!bot || userId !== bot.account.owner.id) {
-      throw new ForbiddenException(
-        'You are not authorized to perform this action',
-      );
-    }
+      if (!bot || userId !== bot.account.owner.id) {
+        throw new ForbiddenException(
+          'You are not authorized to perform this action',
+        );
+      }
 
-    if (body.isActive) {
-      this.initializeBot(bot);
-    } else {
-      this.deactivateBot(body.id);
+      if (body.isActive) {
+        this.initializeBot(bot);
+      } else {
+        this.deactivateBot(body.id);
+      }
+      bot.is_active = body.isActive;
+      this.telegramSettingsRepository.save(bot);
+      return { success: true };
+    } catch (err) {
+      console.error(err);
     }
-    return { success: true };
   }
 
   async deactivateBot(botId: string) {

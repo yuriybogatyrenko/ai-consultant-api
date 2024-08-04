@@ -48,6 +48,7 @@ export class ContactsService {
 
     let contact = await this.contactRepository.findOneBy({
       platform_user_id: message.chat.id.toString(),
+      account: { account_id: account.account_id },
     });
 
     if (!contact) {

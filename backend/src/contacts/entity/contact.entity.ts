@@ -45,7 +45,7 @@ export class Contact {
   @OneToMany(() => ContactMessage, (message) => message.contact)
   messages: ContactMessage[];
 
-  @OneToOne(() => ContactThread, (thread) => thread.contact)
+  @OneToMany(() => ContactThread, (thread) => thread.contact)
   thread: ContactThread;
 
   @ManyToOne(() => Account, (account) => account.contacts)
