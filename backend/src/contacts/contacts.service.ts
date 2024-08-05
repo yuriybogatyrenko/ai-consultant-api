@@ -7,6 +7,8 @@ import { ContactMessage } from './entity/contact-message.entity';
 import TelegramBot from 'node-telegram-bot-api';
 import { PlatformsEnum } from 'src/enums/platforms.enum';
 import { Account } from 'src/accounts/entity/account.entity';
+import { MessageDirection } from './enums/message-direction.enum';
+import { MessageType } from './enums/message-type.enum';
 
 @Injectable()
 export class ContactsService {
@@ -88,10 +90,27 @@ export class ContactsService {
       platform: PlatformsEnum.TELEGRAM,
       thread: thread,
       contact: contact,
+      message_type: MessageType.Text,
+      message_direction: MessageDirection.Incoming,
     });
 
     dbMessage = await this.messageRepository.save(dbMessage);
 
     return { message: dbMessage, thread, contact };
+  }
+
+  async createSystemMessage(text: string, thread: ContactThread) {
+    const message = this.messageRepository.create({
+      thread,
+      content: text,
+      message_type: MessageType.Text,
+      message_direction: MessageDirection.Outgoing,
+    });
+
+    return await this.messageRepository.save(message);
+  }
+
+  async updateContactMessage(message: ContactMessage) {
+    return this.messageRepository.save(message);
   }
 }

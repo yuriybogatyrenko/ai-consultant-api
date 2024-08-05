@@ -104,9 +104,7 @@ export class GptApiService {
     contact: Contact,
   ) {
     try {
-      // console.log('sendMessageToGpt', args);
       const openai = this.getOrCreateOpenAiClient(bot.account);
-      // const threadId = bot.thread_id;
       if (!thread.gpt_thread_id) {
         const openAiThread = await openai.beta.threads.create();
         thread.gpt_thread_id = openAiThread.id;
@@ -128,7 +126,7 @@ export class GptApiService {
       const accountWithCustomFields: any =
         await this.accountsService.getAccountCustomFields(bot.account);
 
-      console.log(accountWithCustomFields);
+      // console.log(accountWithCustomFields);
 
       let i = 0;
       while (i < 20) {
@@ -146,8 +144,14 @@ export class GptApiService {
             thread.gpt_thread_id,
           );
           console.log('run completed');
-          // console.log('message', messages);
-          return this.getThreadLastMessage(messages);
+
+          const gptResponseMessage = this.getThreadLastMessage(messages);
+
+          const systemMessage = await this.contactService.createSystemMessage(
+            gptResponseMessage,
+            thread,
+          );
+          return systemMessage;
         }
 
         if (runResult.status === 'requires_action') {

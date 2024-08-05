@@ -11,6 +11,8 @@ import { PlatformTelegramSetting } from './entity/platform-telegram.entity';
 import { CreateTelegramSettingsDto } from './dto/create-telegram-settings.dto';
 import { ContactsService } from 'src/contacts/contacts.service';
 import { GptApiService } from 'src/gpt-api/gpt-api.service';
+import { PlatformsEnum } from 'src/enums/platforms.enum';
+import { ContactMessage } from 'src/contacts/entity/contact-message.entity';
 
 @Injectable()
 export class PlatformTelegramService {
@@ -101,17 +103,21 @@ export class PlatformTelegramService {
     const { message, thread, contact } =
       await this.contactService.createMessageFromTelegram(msg, botDb.account);
 
-    const gptResponse: any = await this.gptApiService.sendMessageToGpt(
+    const messageDb: ContactMessage = await this.gptApiService.sendMessageToGpt(
       botDb,
       message,
       thread,
       contact,
     );
 
-    console.log('GPT response:', gptResponse);
+    console.log('GPT response:', messageDb);
     const bot = this.bots.get(botId);
     if (bot) {
-      bot.sendMessage(chatId, gptResponse);
+      const telegramMesssage = await bot.sendMessage(chatId, messageDb.content);
+
+      messageDb.platoform_message_id = telegramMesssage.message_id.toString();
+      messageDb.platform = PlatformsEnum.TELEGRAM;
+      await this.contactService.updateContactMessage(messageDb);
     }
   }
 

@@ -12,6 +12,7 @@ import {
 import * as bcrypt from 'bcrypt';
 import { Account } from 'src/accounts/entity/account.entity';
 import { ContactThread } from 'src/contacts/entity/contact-thread.entity';
+import { ContactMessage } from 'src/contacts/entity/contact-message.entity';
 
 @Entity()
 export class UserEntity {
@@ -38,6 +39,9 @@ export class UserEntity {
 
   @OneToMany(() => ContactThread, (thread) => thread.user)
   threads: ContactThread[];
+
+  @OneToMany(() => ContactMessage, (message) => message.user)
+  messages: ContactMessage[];
 
   @Column({ type: 'enum', enum: ['admin', 'user'], default: 'user' })
   user_type: string;
