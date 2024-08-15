@@ -27,7 +27,7 @@ export class ContactMessage {
   @JoinColumn()
   contact: Contact;
 
-  @Column({ type: 'text' })
+  @Column({ type: 'text', nullable: true })
   content: string;
 
   @Column({ nullable: true })

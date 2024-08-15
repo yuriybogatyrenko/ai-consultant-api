@@ -5,7 +5,6 @@ import {
   Injectable,
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import * as TelegramBot from 'node-telegram-bot-api';
 import { Repository } from 'typeorm';
 import { PlatformTelegramSetting } from './entity/platform-telegram.entity';
 import { CreateTelegramSettingsDto } from './dto/create-telegram-settings.dto';
@@ -13,10 +12,14 @@ import { ContactsService } from 'src/contacts/contacts.service';
 import { GptApiService } from 'src/gpt-api/gpt-api.service';
 import { PlatformsEnum } from 'src/enums/platforms.enum';
 import { ContactMessage } from 'src/contacts/entity/contact-message.entity';
+import { ConfigService } from '@nestjs/config';
+import { Telegraf } from 'telegraf';
+import { message } from 'telegraf/filters';
+import { Message } from 'telegraf/typings/core/types/typegram';
 
 @Injectable()
 export class PlatformTelegramService {
-  private bots = new Map<string, TelegramBot>();
+  private bots = new Map<string, Telegraf>();
 
   constructor(
     @InjectRepository(PlatformTelegramSetting)
@@ -24,18 +27,49 @@ export class PlatformTelegramService {
     private readonly contactService: ContactsService,
     @Inject(forwardRef(() => GptApiService))
     private readonly gptApiService: GptApiService,
+    private configService: ConfigService,
   ) {}
 
   async onModuleInit() {
-    const bots = await this.telegramSettingsRepository.find();
+    const bots = await this.telegramSettingsRepository.find({
+      where: { is_active: true },
+    });
     bots.forEach((bot) => this.initializeBot(bot));
   }
 
   async initializeBot(bot: PlatformTelegramSetting) {
     if (!this.bots.has(bot.id)) {
-      const telegramBot = new TelegramBot(bot.access_token, { polling: true });
-      telegramBot.on('message', (msg) => this.handleMessage(bot.id, msg));
+      console.log('initializing bot', bot.id);
+      const telegramBot = new Telegraf(bot.access_token);
+
+      if (!this.configService.get('BACKEND_APP_URL')) {
+        throw new Error('BACKEND_APP_URL is not set in .env file');
+      }
+      const setWebHook = await telegramBot.telegram.setWebhook(
+        this.configService.get('BACKEND_APP_URL') +
+          '/platform-telegram/webhook/' +
+          bot.id,
+      );
+
+      telegramBot.telegram.getWebhookInfo().then((info) => {
+        console.log('webhook info', info);
+      });
+
+      telegramBot.on(message('text'), (ctx) => {
+        // console.log('msg', ctx);
+        this.handleMessage(bot.id, ctx.update.message);
+      });
+
       this.bots.set(bot.id, telegramBot);
+    }
+  }
+
+  handleUpdate(botId: string, update: any) {
+    const bot = this.bots.get(botId);
+    console.log(this.bots);
+    if (bot) {
+      console.log('fire update', update);
+      bot.handleUpdate(update);
     }
   }
 
@@ -75,7 +109,7 @@ export class PlatformTelegramService {
       await this.telegramSettingsRepository.update(botId, {
         is_active: false,
       });
-      bot.stopPolling();
+      bot.telegram.deleteWebhook();
       this.bots.delete(botId);
     }
   }
@@ -91,7 +125,8 @@ export class PlatformTelegramService {
     return savedBot;
   }
 
-  private async handleMessage(botId: string, msg: TelegramBot.Message) {
+  private async handleMessage(botId: string, msg: Message.TextMessage) {
+    // console.log(msg);
     const chatId = msg.chat.id;
     const text = msg.text;
 
@@ -113,7 +148,10 @@ export class PlatformTelegramService {
     console.log('GPT response:', messageDb);
     const bot = this.bots.get(botId);
     if (bot) {
-      const telegramMesssage = await bot.sendMessage(chatId, messageDb.content);
+      const telegramMesssage = await bot.telegram.sendMessage(
+        chatId,
+        messageDb.content,
+      );
 
       messageDb.platoform_message_id = telegramMesssage.message_id.toString();
       messageDb.platform = PlatformsEnum.TELEGRAM;

@@ -38,6 +38,7 @@ export class GptApiService {
   ) {}
   async getAssistants(userId: string, accountId: string) {
     // console.log('userId', userId);
+    // console.log('accountId', accountId);
     const account = await this.accountsService.findOne(accountId);
     // console.log('account', account);
 
@@ -106,10 +107,22 @@ export class GptApiService {
     try {
       const openai = this.getOrCreateOpenAiClient(bot.account);
       if (!thread.gpt_thread_id) {
-        const openAiThread = await openai.beta.threads.create();
-        thread.gpt_thread_id = openAiThread.id;
-        await this.threadRepository.save(thread);
+        await this.createThread(openai, thread);
       }
+
+      if (thread.gpt_thread_id) {
+        try {
+          const myThread = await openai.beta.threads.retrieve(
+            thread.gpt_thread_id,
+          );
+        } catch (err) {
+          if (err.status === 404) {
+            await this.createThread(openai, thread);
+          }
+        }
+      }
+
+      console.log('---', thread);
 
       await openai.beta.threads.messages.create(thread.gpt_thread_id, {
         role: 'user',
@@ -255,5 +268,11 @@ export class GptApiService {
     } catch (err) {
       console.log('submit tool outputs error', err);
     }
+  }
+
+  private async createThread(openai: OpenAI, thread: ContactThread) {
+    const openAiThread = await openai.beta.threads.create();
+    thread.gpt_thread_id = openAiThread.id;
+    await this.threadRepository.save(thread);
   }
 }

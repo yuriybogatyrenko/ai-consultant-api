@@ -9,6 +9,7 @@ import { PlatformsEnum } from 'src/enums/platforms.enum';
 import { Account } from 'src/accounts/entity/account.entity';
 import { MessageDirection } from './enums/message-direction.enum';
 import { MessageType } from './enums/message-type.enum';
+import { Message } from 'telegraf/typings/core/types/typegram';
 
 @Injectable()
 export class ContactsService {
@@ -41,12 +42,14 @@ export class ContactsService {
   }
 
   async createMessageFromTelegram(
-    message: TelegramBot.Message,
+    message: Message.TextMessage,
     account: Account,
   ) {
     if (!account) {
       throw new NotFoundException('Account not found');
     }
+
+    // console.log(message);
 
     let contact = await this.contactRepository.findOneBy({
       platform_user_id: message.chat.id.toString(),
@@ -58,16 +61,14 @@ export class ContactsService {
       contact = await this.createContact(
         {
           platform: PlatformsEnum.TELEGRAM,
-          name: message.chat.first_name,
+          name: message.from.first_name,
           language_code: message.from.language_code,
           platform_user_id: message.chat.id.toString(),
-          platform_username: message.chat.username,
+          platform_username: message.from.username,
         },
         account,
       );
     }
-
-    console.log('contact', contact);
 
     let thread = await this.threadRepository.findOneBy({
       contact: { contact_id: contact.contact_id },
@@ -82,7 +83,7 @@ export class ContactsService {
       thread = await this.threadRepository.save(thread);
     }
 
-    console.log('thread', thread);
+    // console.log('thread', thread);
 
     let dbMessage = this.messageRepository.create({
       platoform_message_id: message.message_id.toString(),

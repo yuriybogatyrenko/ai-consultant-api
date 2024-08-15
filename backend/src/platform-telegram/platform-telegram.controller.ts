@@ -30,4 +30,10 @@ export class PlatformTelegramController {
       CreateTelegramSettingsDto,
     );
   }
+
+  @Post('webhook/:id')
+  async handleWebhook(@Param('id') id: string, @Body() body: any) {
+    console.log('webhook fire');
+    return this.telegramService.handleUpdate(id, body);
+  }
 }

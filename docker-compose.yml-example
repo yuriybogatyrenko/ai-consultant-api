@@ -1,0 +1,11 @@
+services:
+  app:
+    image: registry/docker-test-project:latest
+    container_name: app #NEED TO CHANGE
+    restart: unless-stopped
+    ports:
+      - "3007:3000"
+    volumes:
+      - "./backend/.env:/var/www/app/backend/.env"
+      - "./uploads:/var/www/app/uploads"
+      - "./frontend/dist:/var/www/app/frontend/dist"
