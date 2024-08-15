@@ -78,6 +78,8 @@ export class ContactsService {
       console.log('thread not found');
       thread = this.threadRepository.create({
         contact: contact,
+        platform_chat_id:
+          PlatformsEnum.TELEGRAM + '-' + message.chat.id.toString(),
       });
 
       thread = await this.threadRepository.save(thread);

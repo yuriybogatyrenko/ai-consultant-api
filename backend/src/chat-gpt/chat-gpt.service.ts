@@ -12,8 +12,10 @@ export class ChatGptService {
 
   constructor(private readonly configService: ConfigService) {
     this.gptApiKey = this.configService.get<string>('GPT_API');
+    console.log('GPT API KEY', this.gptApiKey);
 
-    this.openAI = new OpenAI({ apiKey: this.gptApiKey });
+    // this.openAI = new OpenAI({ apiKey: this.gptApiKey });
+    console.log('OpenAI', this.openAI);
   }
 
   generateResponse(content: string, threadId: string): Promise<any> {

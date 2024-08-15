@@ -20,6 +20,7 @@ import { Message } from 'telegraf/typings/core/types/typegram';
 @Injectable()
 export class PlatformTelegramService {
   private bots = new Map<string, Telegraf>();
+  private processingMap = new Map<string, Promise<void>>();
 
   constructor(
     @InjectRepository(PlatformTelegramSetting)
@@ -57,7 +58,7 @@ export class PlatformTelegramService {
 
       telegramBot.on(message('text'), (ctx) => {
         // console.log('msg', ctx);
-        this.handleMessage(bot.id, ctx.update.message);
+        this.handleTelegramMessage(bot.id, ctx.update.message);
       });
 
       this.bots.set(bot.id, telegramBot);
@@ -66,9 +67,9 @@ export class PlatformTelegramService {
 
   handleUpdate(botId: string, update: any) {
     const bot = this.bots.get(botId);
-    console.log(this.bots);
+    // console.log(this.bots);
     if (bot) {
-      console.log('fire update', update);
+      // console.log('fire update', update);
       bot.handleUpdate(update);
     }
   }
@@ -125,38 +126,54 @@ export class PlatformTelegramService {
     return savedBot;
   }
 
-  private async handleMessage(botId: string, msg: Message.TextMessage) {
+  private async handleTelegramMessage(botId: string, msg: Message.TextMessage) {
     // console.log(msg);
-    const chatId = msg.chat.id;
-    const text = msg.text;
+    const chatId = PlatformsEnum.TELEGRAM + '-' + msg.chat.id.toString();
 
     const botDb = await this.telegramSettingsRepository.findOne({
       where: { id: botId },
       relations: { account: true },
     });
 
-    const { message, thread, contact } =
-      await this.contactService.createMessageFromTelegram(msg, botDb.account);
+    const previousPromise = this.processingMap.get(chatId) || Promise.resolve();
 
-    const messageDb: ContactMessage = await this.gptApiService.sendMessageToGpt(
-      botDb,
-      message,
-      thread,
-      contact,
-    );
+    const processingPromise = previousPromise.then(async () => {
+      await this.gptApiService.startMessaging(botDb, chatId, msg);
 
-    console.log('GPT response:', messageDb);
-    const bot = this.bots.get(botId);
-    if (bot) {
-      const telegramMesssage = await bot.telegram.sendMessage(
-        chatId,
-        messageDb.content,
-      );
+      const { message, thread, contact } =
+        await this.contactService.createMessageFromTelegram(msg, botDb.account);
 
-      messageDb.platoform_message_id = telegramMesssage.message_id.toString();
-      messageDb.platform = PlatformsEnum.TELEGRAM;
-      await this.contactService.updateContactMessage(messageDb);
-    }
+      const messageDb: ContactMessage =
+        await this.gptApiService.sendMessageToGpt(
+          botDb,
+          message,
+          thread,
+          chatId,
+        );
+
+      console.log('GPT response:', messageDb);
+      if (!messageDb) return;
+      const bot = this.bots.get(botId);
+      if (bot) {
+        const telegramMesssage = await bot.telegram.sendMessage(
+          +chatId.replace(PlatformsEnum.TELEGRAM + '-', ''),
+          messageDb.content,
+        );
+
+        messageDb.platoform_message_id = telegramMesssage.message_id.toString();
+        messageDb.platform = PlatformsEnum.TELEGRAM;
+        await this.contactService.updateContactMessage(messageDb);
+      }
+    });
+
+    this.processingMap.set(chatId, processingPromise);
+
+    // Убираем обработку после завершения
+    processingPromise.finally(() => {
+      this.processingMap.delete(chatId);
+    });
+
+    await processingPromise;
   }
 
   async getAccountBots(accountId: string) {
