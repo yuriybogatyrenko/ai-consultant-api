@@ -306,7 +306,7 @@ export class GptApiService {
   }
 
   private async processToolCall(
-    toolCall,
+    toolCall: any,
     webhookUrl: string,
     contact: Contact,
   ): Promise<any> {
