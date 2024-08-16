@@ -12,7 +12,7 @@ import { PlansService } from './plans.service';
 import { Plan } from './entity/billing-plan.entity';
 import { CreatePlanDto } from './dto/create-plan.dto';
 import { UpdatePlanDto } from './dto/update-plan.dto';
-import { JwtAuthGuard } from 'src/auth/jwt-auth.guard';
+import { JwtAuthGuard } from 'src/auth/guards/jwt-auth.guard';
 import { Permissions } from 'src/users/decoratorts/permissions.decorator';
 
 @UseGuards(JwtAuthGuard)

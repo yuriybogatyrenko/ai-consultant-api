@@ -1,4 +1,11 @@
-import { Controller } from '@nestjs/common';
+import { Controller, Get } from '@nestjs/common';
 
 @Controller('platform-instagram')
-export class PlatformInstagramController {}
+export class PlatformInstagramController {
+  constructor() {}
+
+  @Get('oauth/callback')
+  oauthRedirect() {
+    return 'Instagram OAuth Redirect';
+  }
+}

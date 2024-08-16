@@ -3,9 +3,16 @@ import { ConfigService } from '@nestjs/config';
 import { AppModule } from './app.module';
 import { CustomValidationPipe } from './pipes/custom-validation.pipe';
 import { useContainer } from 'class-validator';
+import { readFileSync } from 'fs';
+import { join } from 'path';
 
 async function bootstrap() {
-  const app = await NestFactory.create(AppModule);
+  const httpsOptions = {
+    key: readFileSync(join(__dirname, '../../ssl/localhost-key.pem')),
+    cert: readFileSync(join(__dirname, '../../ssl/localhost.pem')),
+  };
+
+  const app = await NestFactory.create(AppModule, { httpsOptions });
   app.setGlobalPrefix('api');
   app.enableCors();
 

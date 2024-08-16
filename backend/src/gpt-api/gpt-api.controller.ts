@@ -10,7 +10,7 @@ import {
 } from '@nestjs/common';
 import { GptApiService } from './gpt-api.service';
 import { GetUser } from 'src/users/decoratorts/user.decorator';
-import { JwtAuthGuard } from 'src/auth/jwt-auth.guard';
+import { JwtAuthGuard } from 'src/auth/guards/jwt-auth.guard';
 import {
   Assistant,
   AssistantCreateParams,

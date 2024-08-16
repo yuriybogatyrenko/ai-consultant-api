@@ -2,34 +2,45 @@
   <v-col cols="12">
     <h3>Подключения</h3>
 
-    <v-btn :to="{ name: 'gpt-settings', params: { id: $route.params.id } }"
-      >GTP SETTINGS</v-btn
-    >
     <v-expansion-panels>
       <v-expansion-panel>
-        <v-expansion-panel-header>GPT</v-expansion-panel-header>
-        <v-expansion-panel-content>
-          <v-text-field
-            type="password"
-            v-model="accountSettings.gpt_api_key"
-            label="API Key"
-            required
-          />
-          <v-btn @click.prevent="saveGptKey">Save</v-btn>
-        </v-expansion-panel-content>
+        <v-expansion-panel-title>GPT</v-expansion-panel-title>
+        <v-expansion-panel-text>
+          <div class="mb-5">
+            <v-text-field
+              type="password"
+              v-model="accountSettings.gpt_api_key"
+              label="API Key"
+              required
+            />
+            <v-btn @click.prevent="saveGptKey">Save</v-btn>
+          </div>
+
+          <div class="d-flex justify-space-between align-center">
+            <v-switch
+              v-model="accountSettings.use_gpt"
+              color="success"
+              label="GPT Status"
+              @change="toggleGpt($event)"
+            ></v-switch>
+
+            <v-btn
+              :to="{ name: 'gpt-settings', params: { id: $route.params.id } }"
+              >GTP SETTINGS</v-btn
+            >
+          </div>
+        </v-expansion-panel-text>
       </v-expansion-panel>
 
       <v-expansion-panel>
-        <v-expansion-panel-header>Telegram</v-expansion-panel-header>
-        <v-expansion-panel-content>
+        <v-expansion-panel-title>Telegram</v-expansion-panel-title>
+        <v-expansion-panel-text>
           <template v-if="account.telegram_settings">
             <v-list>
               <v-list-item>
-                <v-list-item-content>
-                  <v-list-item-title>{{
-                    account.telegram_settings.bot_username
-                  }}</v-list-item-title>
-                </v-list-item-content>
+                <v-list-item-title>{{
+                  account.telegram_settings.bot_username
+                }}</v-list-item-title>
               </v-list-item>
             </v-list>
 
@@ -47,37 +58,33 @@
             :telegram-settings="account.telegram_settings"
             v-if="showTelegramForm"
           ></TelegramSettingsForm>
-        </v-expansion-panel-content>
+        </v-expansion-panel-text>
       </v-expansion-panel>
 
       <v-expansion-panel>
-        <v-expansion-panel-header>WhatsApp</v-expansion-panel-header>
-        <v-expansion-panel-content>
+        <v-expansion-panel-title>WhatsApp</v-expansion-panel-title>
+        <v-expansion-panel-text>
           <v-list>
             <v-list-item v-if="account.whatsapp_settings">
-              <v-list-item-content>
-                <v-list-item-title>{{
-                  account.whatsapp_settings.phone_number_id
-                }}</v-list-item-title>
-              </v-list-item-content>
+              <v-list-item-title>{{
+                account.whatsapp_settings.phone_number_id
+              }}</v-list-item-title>
             </v-list-item>
           </v-list>
-        </v-expansion-panel-content>
+        </v-expansion-panel-text>
       </v-expansion-panel>
 
       <v-expansion-panel>
-        <v-expansion-panel-header>Instagram</v-expansion-panel-header>
-        <v-expansion-panel-content>
+        <v-expansion-panel-title>Instagram</v-expansion-panel-title>
+        <v-expansion-panel-text>
           <v-list>
             <v-list-item v-if="account.instagram_settings">
-              <v-list-item-content>
-                <v-list-item-title>{{
-                  account.instagram_settings.instagram_username
-                }}</v-list-item-title>
-              </v-list-item-content>
+              <v-list-item-title>{{
+                account.instagram_settings.instagram_username
+              }}</v-list-item-title>
             </v-list-item>
           </v-list>
-        </v-expansion-panel-content>
+        </v-expansion-panel-text>
       </v-expansion-panel>
     </v-expansion-panels>
   </v-col>
@@ -97,6 +104,7 @@ export default {
         telegram: {
           is_active: false,
         },
+        use_gpt: false,
         gpt_api_key: '',
       },
     };
@@ -111,6 +119,7 @@ export default {
         this.accountSettings.telegram.is_active =
           response.telegram_settings?.is_active;
         this.accountSettings.gpt_api_key = response.gpt_api_key;
+        this.accountSettings.use_gpt = response.use_gpt;
         return response;
       });
     },
@@ -130,6 +139,18 @@ export default {
       } catch (error) {
         this.accountSettings.telegram.is_active =
           !this.accountSettings.telegram.is_active;
+      }
+    },
+    async toggleGpt() {
+      try {
+        await api.post(
+          `/accounts/${this.$route.params.account_id}/toggle-gpt`,
+          {
+            isActive: this.accountSettings.use_gpt,
+          },
+        );
+      } catch (error) {
+        this.accountSettings.use_gpt = !this.accountSettings.use_gpt;
       }
     },
     saveGptKey() {

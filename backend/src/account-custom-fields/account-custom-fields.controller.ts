@@ -9,7 +9,7 @@ import {
   UseGuards,
   UsePipes,
 } from '@nestjs/common';
-import { JwtAuthGuard } from 'src/auth/jwt-auth.guard';
+import { JwtAuthGuard } from 'src/auth/guards/jwt-auth.guard';
 import { AccountCustomFieldsService } from './account-custom-fields.service';
 import { GetUser } from 'src/users/decoratorts/user.decorator';
 import { CreateAccountCustomFieldDto } from './dto/create-account-custom-field.dto';

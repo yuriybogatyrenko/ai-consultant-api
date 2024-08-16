@@ -46,15 +46,20 @@ export class PlatformTelegramService {
       if (!this.configService.get('BACKEND_APP_URL')) {
         throw new Error('BACKEND_APP_URL is not set in .env file');
       }
-      const setWebHook = await telegramBot.telegram.setWebhook(
-        this.configService.get('BACKEND_APP_URL') +
-          '/platform-telegram/webhook/' +
-          bot.id,
-      );
 
-      telegramBot.telegram.getWebhookInfo().then((info) => {
-        console.log('webhook info', info);
-      });
+      try {
+        const setWebHook = await telegramBot.telegram.setWebhook(
+          this.configService.get('BACKEND_APP_URL') +
+            '/platform-telegram/webhook/' +
+            bot.id,
+        );
+
+        telegramBot.telegram.getWebhookInfo().then((info) => {
+          console.log('webhook info', info);
+        });
+      } catch (err) {
+        console.error(err);
+      }
 
       telegramBot.on(message('text'), (ctx) => {
         // console.log('msg', ctx);
@@ -143,12 +148,15 @@ export class PlatformTelegramService {
       const { message, thread, contact } =
         await this.contactService.createMessageFromTelegram(msg, botDb.account);
 
+      if (!botDb.account.use_gpt) return;
+
       const messageDb: ContactMessage =
         await this.gptApiService.sendMessageToGpt(
           botDb,
           message,
           thread,
           chatId,
+          contact,
         );
 
       console.log('GPT response:', messageDb);

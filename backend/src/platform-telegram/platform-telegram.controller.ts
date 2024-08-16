@@ -9,7 +9,7 @@ import {
 } from '@nestjs/common';
 import { PlatformTelegramService } from './platform-telegram.service';
 import { GetUser } from 'src/users/decoratorts/user.decorator';
-import { JwtAuthGuard } from 'src/auth/jwt-auth.guard';
+import { JwtAuthGuard } from 'src/auth/guards/jwt-auth.guard';
 import { CreateTelegramSettingsDto } from './dto/create-telegram-settings.dto';
 
 @Controller('platform-telegram')

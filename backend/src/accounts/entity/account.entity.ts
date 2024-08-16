@@ -83,6 +83,12 @@ export class Account {
   @Column({ nullable: true })
   gpt_api_key: string;
 
+  @Column({ type: 'boolean', default: false })
+  use_gpt: boolean;
+
+  @Column({ type: 'boolean', default: false })
+  use_gpt_whisper: boolean;
+
   @CreateDateColumn()
   created_at: Date;
 

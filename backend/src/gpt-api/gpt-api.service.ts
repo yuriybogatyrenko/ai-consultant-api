@@ -30,6 +30,7 @@ import {
   MessageCreateParams,
 } from 'openai/resources/beta/threads/messages';
 import { Run } from 'openai/resources/beta/threads/runs/runs';
+import { Contact } from 'src/contacts/entity/contact.entity';
 
 @Injectable()
 export class GptApiService {
@@ -111,6 +112,7 @@ export class GptApiService {
     message: ContactMessage,
     thread: ContactThread,
     chatId: string,
+    contact: Contact,
   ) {
     try {
       const openai = this.getOrCreateOpenAiClient(bot.account);
@@ -151,6 +153,7 @@ export class GptApiService {
           gptRun,
           bot,
           chatId,
+          contact,
         );
       }
     } catch (err) {
@@ -218,6 +221,7 @@ export class GptApiService {
     gptRun: Run,
     bot: PlatformTelegramSetting,
     chatId: string,
+    contact: Contact,
   ): Promise<ContactMessage> {
     for (let i = 0; i < 20; i++) {
       console.log('platform chat id:', thread.platform_chat_id);
@@ -228,12 +232,12 @@ export class GptApiService {
         gptRun.id,
       );
 
-      console.info(runResult.status);
+      /* console.info(runResult.status);
 
       console.log(
         'check is canceled of failed',
         ['cancelled', 'failed'].includes(runResult.status),
-      );
+      ); */
 
       if (runResult.status === 'expired') {
         this.threadRuns.delete(chatId);
@@ -258,6 +262,7 @@ export class GptApiService {
           thread.gpt_thread_id,
           gptRun.id,
           accountWithCustomFields,
+          contact,
         );
       } else if (['cancelled', 'failed'].includes(runResult.status)) {
         console.log('GPT run cancelled or failed:', runResult.status);
@@ -277,6 +282,7 @@ export class GptApiService {
     gptThreadId: string,
     gptRunId: string,
     accountWithCustomFields: any,
+    contact: Contact,
   ): Promise<void> {
     const toolOutputs = await Promise.all(
       runResult.required_action.submit_tool_outputs.tool_calls.map(
@@ -285,6 +291,7 @@ export class GptApiService {
             return await this.processToolCall(
               toolCall,
               accountWithCustomFields.webhookUrl,
+              contact,
             );
           }
           return {
@@ -298,11 +305,16 @@ export class GptApiService {
     await this.submitToolOutputs(bot, gptThreadId, gptRunId, toolOutputs);
   }
 
-  private async processToolCall(toolCall, webhookUrl: string): Promise<any> {
+  private async processToolCall(
+    toolCall,
+    webhookUrl: string,
+    contact: Contact,
+  ): Promise<any> {
     try {
       const response = await firstValueFrom(
         this.httpService.post(webhookUrl, {
           functionObject: toolCall.function,
+          clientData: contact,
         }),
       );
 

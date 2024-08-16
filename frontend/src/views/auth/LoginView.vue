@@ -34,8 +34,15 @@
       </v-row>
     </v-form>
 
-    <div class="pt-5">
+    <div class="pt-5 pb-5">
       <v-btn :to="{ name: 'register' }">Registration</v-btn>
+    </div>
+
+    <div class="pt-5 pb-5" v-if="FACEBOOK_APP_ID">
+      <v-facebook-login
+        :app-id="FACEBOOK_APP_ID"
+        version="v20.0"
+      ></v-facebook-login>
     </div>
   </v-container>
 </template>
@@ -43,14 +50,46 @@
 <script>
 import api from '@/api.service';
 import authService from '@/services/auth/auth.service';
+import VFacebookLogin from 'vue-facebook-login-component-next';
 
 export default {
+  components: {
+    VFacebookLogin,
+  },
   data() {
     return {
-      form: { email: '', password: '' },
+      form: {
+        email: '',
+        password: '',
+      },
+      FACEBOOK_APP_ID: null,
     };
   },
+  mounted() {
+    this.FACEBOOK_APP_ID = process.env.VUE_APP_FACEBOOK_APP_ID;
+  },
   methods: {
+    facebookLogin() {
+      // eslint-disable-next-line no-undef
+      FB.login(
+        (response) => {
+          console.log('facebook login', response);
+          if (response.authResponse) {
+            api
+              .get('/auth/facebook', {
+                params: { access_token: response.authResponse.accessToken },
+              })
+              .then((res) => {
+                console.log(res);
+                // Handle successful login here
+              });
+          } else {
+            // Handle login failure
+          }
+        },
+        { scope: 'email' },
+      );
+    },
     async loginUser() {
       try {
         const { email, password } = this.form;

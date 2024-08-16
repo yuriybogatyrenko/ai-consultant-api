@@ -7,7 +7,7 @@ import {
   Post,
   UseGuards,
 } from '@nestjs/common';
-import { ApiKeyGuard } from 'src/auth/api-key.guard';
+import { ApiKeyGuard } from 'src/auth/guards/api-key.guard';
 import { ChatGptService } from './chat-gpt.service';
 
 @UseGuards(ApiKeyGuard)

@@ -12,7 +12,7 @@ import { UsersModule } from './users/users.module';
 import { PassportModule } from '@nestjs/passport';
 import { JwtModule } from '@nestjs/jwt';
 import { AuthService } from './auth/auth.service';
-import { JwtStrategy } from './auth/jwt.strategy';
+import { JwtStrategy } from './auth/strategies/jwt.strategy';
 import { typeOrmConfig } from 'db/orm.config';
 import { AuthModule } from './auth/auth.module';
 import { AccountsModule } from './accounts/accounts.module';

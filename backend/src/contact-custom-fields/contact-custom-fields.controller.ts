@@ -10,7 +10,7 @@ import {
   UsePipes,
 } from '@nestjs/common';
 import { ContactCustomFieldsService } from './contact-custom-fields.service';
-import { JwtAuthGuard } from 'src/auth/jwt-auth.guard';
+import { JwtAuthGuard } from 'src/auth/guards/jwt-auth.guard';
 import { GetUser } from 'src/users/decoratorts/user.decorator';
 import { CreateContactCustomFieldDto } from './dto/create-contact-custom-field-value.dto';
 import { CustomValidationPipe } from 'src/pipes/custom-validation.pipe';

@@ -154,4 +154,23 @@ export class AccountsService {
 
     return fields;
   }
+
+  async toggleUseGpt(
+    userId: string,
+    accountId: string,
+    isActive: boolean,
+  ): Promise<Account> {
+    const account = await this.accountsRepository.findOneBy({
+      account_id: accountId,
+      owner: { id: userId },
+    });
+
+    if (!account) {
+      throw new NotFoundException('Account not found');
+    }
+
+    account.use_gpt = isActive;
+
+    return this.accountsRepository.save(account);
+  }
 }

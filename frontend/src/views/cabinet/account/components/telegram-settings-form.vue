@@ -20,7 +20,7 @@
       >
     </v-form>
 
-    <pre>{{ settings }}</pre>
+    <!-- <pre>{{ settings }}</pre> -->
   </v-container>
 </template>
 

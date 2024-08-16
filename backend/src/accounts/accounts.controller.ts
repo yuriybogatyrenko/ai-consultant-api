@@ -11,7 +11,7 @@ import {
 import { AccountsService } from './accounts.service';
 import { Account } from './entity/account.entity';
 import { GetUser } from 'src/users/decoratorts/user.decorator';
-import { JwtAuthGuard } from 'src/auth/jwt-auth.guard';
+import { JwtAuthGuard } from 'src/auth/guards/jwt-auth.guard';
 import { CreateAccountDto } from './dto/create-account.dto';
 import { UpdateAccountDto } from './dto/update-account.dto';
 
@@ -106,5 +106,14 @@ export class AccountsController {
     @Body('gptApiKey') gptApiKey: string,
   ): Promise<Account> {
     return this.accountsService.saveGptApiKey(userId, accountId, gptApiKey);
+  }
+
+  @Post(':accountId/toggle-gpt')
+  async toggleUseGpt(
+    @GetUser('userId') userId: string,
+    @Param('accountId') accountId: string,
+    @Body('isActive') isActive: boolean,
+  ): Promise<Account> {
+    return this.accountsService.toggleUseGpt(userId, accountId, isActive);
   }
 }

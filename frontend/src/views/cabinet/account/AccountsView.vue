@@ -24,18 +24,14 @@
         <v-col cols="4" v-for="account in accounts" :key="account.account_id">
           <v-list>
             <v-list-item>
-              <v-list-item-content>
-                <v-list-item-title>Название:</v-list-item-title>
-                <v-list-item-subtitle>{{ account.title }}</v-list-item-subtitle>
-              </v-list-item-content>
+              <v-list-item-title>Название:</v-list-item-title>
+              <v-list-item-subtitle>{{ account.title }}</v-list-item-subtitle>
             </v-list-item>
             <v-list-item>
-              <v-list-item-content>
-                <v-list-item-title>Описание:</v-list-item-title>
-                <v-list-item-subtitle>{{
-                  account.description
-                }}</v-list-item-subtitle>
-              </v-list-item-content>
+              <v-list-item-title>Описание:</v-list-item-title>
+              <v-list-item-subtitle>{{
+                account.description
+              }}</v-list-item-subtitle>
             </v-list-item>
           </v-list>
 
