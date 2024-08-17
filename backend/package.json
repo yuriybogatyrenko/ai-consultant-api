@@ -22,8 +22,8 @@
     "migration:run": "npm run typeorm migration:run -- -d ./db/data-source.ts",
     "migration:generate": "npm run typeorm -- -d ./db/data-source.ts migration:generate ./db/migrations/$npm_config_name",
     "migration:create": "npm run typeorm -- migration:create ./db/migrations/$npm_config_name",
-    "migration:revert": "npm run typeorm -- -d ./db/data-source.ts migration:revert",
-    "migration:show": "npm run typeorm -- -d ./db/data-source.ts migration:show"
+    "migration:revert": "npm run typeorm migration:revert -- -d ./db/data-source.ts",
+    "migration:show": "npm run typeorm migration:show -- -d ./db/data-source.ts"
   },
   "dependencies": {
     "@nestjs/axios": "^3.0.2",
