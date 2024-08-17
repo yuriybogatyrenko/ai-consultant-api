@@ -11,6 +11,7 @@ RUN \
     # Project related packages
     nodejs-current npm \
     yarn && \
+    npm i -g ts-node && \
     # Configure timezone
     cp /usr/share/zoneinfo/Asia/Almaty /etc/localtime && \
     echo "Asia/Almaty" > /etc/timezone
