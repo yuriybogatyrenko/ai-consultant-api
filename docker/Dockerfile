@@ -9,8 +9,9 @@ RUN \
     tzdata supervisor dcron bash git vim \
     figlet ncurses util-linux-misc \
     # Project related packages
-    nodejs-current ts-node npm \
+    nodejs-current npm \
     yarn && \
+    npm i -g ts-node && \
     # Configure timezone
     cp /usr/share/zoneinfo/Asia/Almaty /etc/localtime && \
     echo "Asia/Almaty" > /etc/timezone
