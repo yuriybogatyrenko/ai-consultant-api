@@ -44,10 +44,11 @@ export class AuthController {
   async facebookLoginCallback(@Req() req: any, @Res() res: Response) {
     // Successful authentication, redirect or respond with JWT or user info
     const user = req.user;
+    console.log('Facebook login callback', user);
 
     // For example, you could redirect the user to your frontend with a JWT in the query params
     return res.redirect(
-      `https://stage1.ai.myassistants.app?token=${user.token}`,
+      `https://stage1.ai.myassistants.app/auth/login?token=${user.accessToken}`,
     );
   }
 }
