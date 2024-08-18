@@ -39,15 +39,16 @@
     </div>
 
     <div class="pt-5 pb-5" v-if="FACEBOOK_APP_ID">
+      <button @click="redirectToFacebook">Login with Facebook</button>
       <!-- <v-facebook-login
         :app-id="FACEBOOK_APP_ID"
         version="v20.0"
       ></v-facebook-login> -->
-      <v-facebook-loginc
+      <!-- <v-facebook-loginc
         @login="facebookLogin"
         :app-id="FACEBOOK_APP_ID"
         version="v20.0"
-      ></v-facebook-loginc>
+      ></v-facebook-loginc> -->
     </div>
   </v-container>
 </template>
@@ -56,11 +57,11 @@
 import api from '@/api.service';
 import authService from '@/services/auth/auth.service';
 // import VFacebookLogin from '@/components/fb-login.component.vue';
-import VFacebookLoginc from 'vue-facebook-login-component-next';
+// import VFacebookLoginc from 'vue-facebook-login-component-next';
 
 export default {
   components: {
-    VFacebookLoginc,
+    // VFacebookLoginc,
     // VFacebookLogin,
   },
   data() {
@@ -76,6 +77,10 @@ export default {
     this.FACEBOOK_APP_ID = process.env.VUE_APP_FACEBOOK_APP_ID;
   },
   methods: {
+    redirectToFacebook() {
+      window.location.href =
+        'https://stage1.ai.myassistants.app/api/auth/facebook';
+    },
     async facebookLogin(response) {
       console.log(response);
       if (response && response.authResponse) {

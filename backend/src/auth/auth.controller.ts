@@ -5,6 +5,7 @@ import {
   Post,
   Req,
   Request,
+  Res,
   UseGuards,
   UsePipes,
 } from '@nestjs/common';
@@ -13,6 +14,7 @@ import { AuthService } from './auth.service';
 import { UserRegistrationDto } from './dto/user-registration.dto';
 import { LocalAuthGuard } from './guards/local-auth.guard';
 import { AuthGuard } from '@nestjs/passport';
+import { Response } from 'express';
 
 @Controller('auth')
 export class AuthController {
@@ -39,11 +41,13 @@ export class AuthController {
 
   @Get('facebook/callback')
   @UseGuards(AuthGuard('facebook'))
-  async facebookLoginCallback(@Req() req: any) {
-    // Successful authentication, redirect or respond with JWT
-    return {
-      message: 'Facebook authentication successful',
-      user: req.user,
-    };
+  async facebookLoginCallback(@Req() req: any, @Res() res: Response) {
+    // Successful authentication, redirect or respond with JWT or user info
+    const user = req.user;
+
+    // For example, you could redirect the user to your frontend with a JWT in the query params
+    return res.redirect(
+      `https://stage1.ai.myassistants.app?token=${user.token}`,
+    );
   }
 }
