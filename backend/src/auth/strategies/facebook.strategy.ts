@@ -12,6 +12,7 @@ export class FacebookStrategy extends PassportStrategy(Strategy, 'facebook') {
     private readonly authService: AuthService,
     private configService: ConfigService,
   ) {
+    console.log('FacebookStrategy');
     super({
       clientID: configService.get('FACEBOOK_APP_ID'),
       clientSecret: configService.get('FACEBOOK_APP_SECRET'),
@@ -27,6 +28,12 @@ export class FacebookStrategy extends PassportStrategy(Strategy, 'facebook') {
     profile: any,
     done: Function,
   ) {
+    console.log(
+      'FacebookStrategy validate',
+      accessToken,
+      refreshToken,
+      profile,
+    );
     const { id, name, emails } = profile;
     const user = {
       facebookId: id,

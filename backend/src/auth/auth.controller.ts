@@ -12,17 +12,11 @@ import { CustomValidationPipe } from 'src/pipes/custom-validation.pipe';
 import { AuthService } from './auth.service';
 import { UserRegistrationDto } from './dto/user-registration.dto';
 import { LocalAuthGuard } from './guards/local-auth.guard';
-import { HttpService } from '@nestjs/axios';
-import { ConfigService } from '@nestjs/config';
 import { AuthGuard } from '@nestjs/passport';
 
 @Controller('auth')
 export class AuthController {
-  constructor(
-    private readonly authService: AuthService,
-    private readonly httpService: HttpService,
-    private readonly configService: ConfigService,
-  ) {}
+  constructor(private readonly authService: AuthService) {}
 
   @UseGuards(LocalAuthGuard)
   @Post('login')
