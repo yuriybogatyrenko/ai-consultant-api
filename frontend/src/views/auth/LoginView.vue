@@ -39,10 +39,15 @@
     </div>
 
     <div class="pt-5 pb-5" v-if="FACEBOOK_APP_ID">
-      <v-facebook-login
+      <!-- <v-facebook-login
         :app-id="FACEBOOK_APP_ID"
         version="v20.0"
-      ></v-facebook-login>
+      ></v-facebook-login> -->
+      <v-facebook-loginc
+        @login="facebookLogin"
+        :app-id="FACEBOOK_APP_ID"
+        version="v20.0"
+      ></v-facebook-loginc>
     </div>
   </v-container>
 </template>
@@ -50,11 +55,13 @@
 <script>
 import api from '@/api.service';
 import authService from '@/services/auth/auth.service';
-import VFacebookLogin from 'vue-facebook-login-component-next';
+// import VFacebookLogin from '@/components/fb-login.component.vue';
+import VFacebookLoginc from 'vue-facebook-login-component-next';
 
 export default {
   components: {
-    VFacebookLogin,
+    VFacebookLoginc,
+    // VFacebookLogin,
   },
   data() {
     return {
@@ -69,9 +76,23 @@ export default {
     this.FACEBOOK_APP_ID = process.env.VUE_APP_FACEBOOK_APP_ID;
   },
   methods: {
-    facebookLogin() {
+    async facebookLogin(response) {
+      console.log(response);
+      if (response && response.authResponse) {
+        const accessToken = response.authResponse.accessToken;
+        try {
+          const { data } = await api.get('/auth/facebook', {
+            params: { access_token: accessToken },
+          });
+          console.log('User data:', data);
+        } catch (error) {
+          console.error('Error during authentication:', error);
+        }
+      } else {
+        console.log('User cancelled login or did not fully authorize.');
+      }
       // eslint-disable-next-line no-undef
-      FB.login(
+      /* FB.login(
         (response) => {
           console.log('facebook login', response);
           if (response.authResponse) {
@@ -88,7 +109,7 @@ export default {
           }
         },
         { scope: 'email' },
-      );
+      ); */
     },
     async loginUser() {
       try {

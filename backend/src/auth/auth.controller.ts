@@ -3,10 +3,8 @@ import {
   Controller,
   Get,
   Post,
-  Query,
   Req,
   Request,
-  Res,
   UseGuards,
   UsePipes,
 } from '@nestjs/common';
@@ -16,8 +14,7 @@ import { UserRegistrationDto } from './dto/user-registration.dto';
 import { LocalAuthGuard } from './guards/local-auth.guard';
 import { HttpService } from '@nestjs/axios';
 import { ConfigService } from '@nestjs/config';
-import { Response } from 'express';
-import { firstValueFrom } from 'rxjs';
+import { AuthGuard } from '@nestjs/passport';
 
 @Controller('auth')
 export class AuthController {
@@ -40,59 +37,19 @@ export class AuthController {
   }
 
   @Get('facebook')
-  async facebookLogin(@Res() res: Response) {
-    console.log('facebook login', res);
-    const redirect_uri = `${this.configService.get('BACKEND_APP_URL')}/auth/facebook/callback`;
-    const client_id = this.configService.get('FACEBOOK_APP_ID');
-
-    // Redirect to Facebook's OAuth dialog
-    res.redirect(
-      'https://www.facebook.com/v20.0/dialog/oauth?client_id=' +
-        client_id +
-        '&redirect_uri=' +
-        redirect_uri +
-        '&state=email',
-    );
+  @UseGuards(AuthGuard('facebook'))
+  async facebookLogin(): Promise<void> {
+    console.log('Facebook login');
+    // Facebook login redirects to this method, but we don't need to handle anything here
   }
 
   @Get('facebook/callback')
-  async facebookCallback(@Query('code') code: string, @Res() res: Response) {
-    const redirect_uri = 'https://localhost:3000/auth/facebook/callback';
-    const client_id = 'your-facebook-app-id';
-    const client_secret = 'your-facebook-app-secret';
-
-    // Exchange code for access token
-    const tokenResponse = await firstValueFrom(
-      this.httpService.get(
-        `https://graph.facebook.com/v3.2/oauth/access_token`,
-        {
-          params: {
-            client_id,
-            redirect_uri,
-            client_secret,
-            code,
-          },
-        },
-      ),
-    );
-
-    const accessToken = tokenResponse.data.access_token;
-
-    // Fetch user information
-    const userResponse = await firstValueFrom(
-      this.httpService.get(`https://graph.facebook.com/me`, {
-        params: {
-          access_token: accessToken,
-          fields: 'id,name,email',
-        },
-      }),
-    );
-
-    // Handle user login or registration here
-
-    // Redirect or respond to your frontend
-    res.redirect(
-      `https://localhost:8080?user=${JSON.stringify(userResponse.data)}`,
-    );
+  @UseGuards(AuthGuard('facebook'))
+  async facebookLoginCallback(@Req() req: any) {
+    // Successful authentication, redirect or respond with JWT
+    return {
+      message: 'Facebook authentication successful',
+      user: req.user,
+    };
   }
 }
